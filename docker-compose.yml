@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SERVICE=gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - AUTH_SERVICE_HOST=auth
+      - AUTH_SERVICE_PORT=3001
+      - EVENT_SERVICE_HOST=event
+      - EVENT_SERVICE_PORT=3002
+      - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    depends_on:
+      - auth
+      - event
+      - mongodb
+    networks:
+      - nexon-network
+
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SERVICE=auth
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+    networks:
+      - nexon-network
+
+  event:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SERVICE=event
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+    networks:
+      - nexon-network
+
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - nexon-network
+    
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+    depends_on:
+      - mongodb
+    networks:
+      - nexon-network
+
+networks:
+  nexon-network:
+    driver: bridge
+
+volumes:
+  mongodb_data: 

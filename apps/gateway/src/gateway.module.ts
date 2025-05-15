@@ -30,4 +30,4 @@ import { GatewayController } from './presentation/gateway.controller';
   controllers: [GatewayController],
   providers: [],
 })
-export class AppModule { } 
+export class GatewayModule { } 

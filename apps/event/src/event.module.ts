@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventController } from './presentation/event.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './apps/event/.env',
     }),
   ],
-  controllers: [],
+  controllers: [EventController],
   providers: [],
 })
-export class EventModule {} 
+export class EventModule { } 

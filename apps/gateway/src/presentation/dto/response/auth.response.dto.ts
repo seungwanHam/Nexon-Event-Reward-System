@@ -52,6 +52,20 @@ export class UserProfileResponseDto {
   updatedAt: string;
 }
 
+export class ErrorDetailDto {
+  @ApiProperty({
+    example: 6,
+    description: '에러 코드'
+  })
+  code: number;
+
+  @ApiProperty({
+    example: { code: 'AUTH003', field: 'email' },
+    description: '에러 상세 정보'
+  })
+  details?: Record<string, any>;
+}
+
 export class AuthResponseDto {
   @ApiProperty({
     example: true,
@@ -70,4 +84,11 @@ export class AuthResponseDto {
     type: () => TokenResponseDto,
   })
   data?: TokenResponseDto | UserProfileResponseDto;
+
+  @ApiProperty({
+    description: '에러 정보',
+    type: () => ErrorDetailDto,
+    required: false
+  })
+  error?: ErrorDetailDto;
 } 

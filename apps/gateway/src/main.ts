@@ -3,11 +3,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GatewayModule } from './gateway.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { join } from 'path';
+import { WinstonLoggerService } from '@app/libs/infrastructure/logger';
 
 async function bootstrap() {
   try {
+    // 로거 설정
+    const logger = new WinstonLoggerService();
+
     // HTTP 서버 생성
     const app = await NestFactory.create(GatewayModule);
     const configService = app.get(ConfigService);
@@ -18,7 +20,17 @@ async function bootstrap() {
       transform: true,
       forbidNonWhitelisted: true,
     }));
-    app.enableCors();
+
+    // CORS 설정
+    if (process.env.NODE_ENV !== 'production') {
+      app.enableCors({
+        origin: '*',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+        credentials: true,
+      });
+    }
 
     // Swagger 설정
     const config = new DocumentBuilder()
@@ -31,27 +43,14 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
 
-    // 포트 설정
+    // HTTP 포트 설정
     const httpPort = configService.get<number>('GATEWAY_HTTP_PORT') || 3001;
-    const grpcPort = configService.get<number>('GATEWAY_GRPC_PORT') || 5001;
-
-    // gRPC 마이크로서비스 설정
-    app.connectMicroservice<MicroserviceOptions>({
-      transport: Transport.GRPC,
-      options: {
-        package: 'gateway',
-        protoPath: join(process.cwd(), 'proto/gateway.proto'),
-        url: `0.0.0.0:${grpcPort}`,
-      },
-    });
 
     // 서버 시작
-    await app.startAllMicroservices();
     await app.listen(httpPort);
 
-    console.log(`Gateway HTTP API is running on port ${httpPort}`);
-    console.log(`Gateway gRPC service is running on port ${grpcPort}`);
-    console.log(`Swagger docs available at http://localhost:${httpPort}/api/docs`);
+    logger.log(`Gateway HTTP API is running on port ${httpPort}`);
+    logger.log(`Swagger docs available at http://localhost:${httpPort}/api/docs`);
   } catch (error) {
     console.error('Failed to start Gateway service:', error);
     process.exit(1);

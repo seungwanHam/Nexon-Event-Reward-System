@@ -13,6 +13,7 @@ export enum UserRole {
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
+  PENDING = 'pending',
   SUSPENDED = 'suspended',
   DELETED = 'deleted',
 }
@@ -28,7 +29,7 @@ export enum UserStatus {
   }
 })
 export class User {
-  @Prop({ required: true, unique: true, trim: true, lowercase: true })
+  @Prop({ required: true, trim: true, lowercase: true })
   email: string;
 
   @Prop({ required: true })
@@ -52,8 +53,7 @@ export class User {
   @Prop()
   refreshToken?: string;
 
-  // 친구 초대 시나리오를 위한 필드
-  @Prop({ unique: true, sparse: true })
+  @Prop({ sparse: true })
   inviteCode?: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', default: null })
@@ -63,10 +63,10 @@ export class User {
 export const UserSchema = SchemaFactory.createForClass(User);
 
 // 인덱스 설정
-UserSchema.index({ email: 1 });
+UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ nickname: 1 });
 UserSchema.index({ status: 1 });
 UserSchema.index({ roles: 1 });
-UserSchema.index({ inviteCode: 1 });
+UserSchema.index({ inviteCode: 1 }, { unique: true, sparse: true });
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ lastLoginAt: -1 }); 

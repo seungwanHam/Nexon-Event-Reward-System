@@ -1,0 +1,241 @@
+syntax = "proto3";
+
+package event;
+
+// 이벤트 서비스 정의
+service EventService {
+  // 이벤트 규칙 관련 RPC
+  rpc FindAllEventRules(FindAllEventRulesRequest) returns (EventRulesResponse) {}
+  rpc FindActiveEventRules(EmptyRequest) returns (EventRulesResponse) {}
+  rpc FindEventRuleById(FindByIdRequest) returns (EventRuleResponse) {}
+  rpc CreateEventRule(CreateEventRuleRequest) returns (EventRuleResponse) {}
+  rpc UpdateEventRule(UpdateEventRuleRequest) returns (EventRuleResponse) {}
+  rpc ToggleEventRuleStatus(ToggleEventRuleStatusRequest) returns (EventRuleResponse) {}
+  rpc DeleteEventRule(FindByIdRequest) returns (DeleteResponse) {}
+  
+  // 사용자 이벤트 관련 RPC
+  rpc RecordUserEvent(RecordUserEventRequest) returns (UserEventResponse) {}
+  rpc FindUserEvents(FindUserEventsRequest) returns (UserEventsResponse) {}
+  
+  // 보상 관련 RPC
+  rpc RequestReward(RequestRewardRequest) returns (RewardResponse) {}
+  rpc ApproveReward(ProcessRewardRequest) returns (RewardResponse) {}
+  rpc RejectReward(ProcessRewardRequest) returns (RewardResponse) {}
+  rpc CompleteReward(ProcessRewardRequest) returns (RewardResponse) {}
+  rpc FindPendingRewards(FindRewardsRequest) returns (RewardsResponse) {}
+  rpc SearchRewards(SearchRewardsRequest) returns (RewardsResponse) {}
+  rpc FindUserRewardHistory(FindUserRewardsRequest) returns (RewardsResponse) {}
+  
+  // 헬스 체크
+  rpc HealthCheck(EmptyRequest) returns (HealthCheckResponse) {}
+}
+
+// 공통 메시지
+message EmptyRequest {}
+
+message FindByIdRequest {
+  string id = 1;
+}
+
+message DeleteResponse {
+  bool success = 1;
+}
+
+// 이벤트 규칙 관련 메시지
+message EventRule {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  bool is_active = 4;
+  string start_date = 5;
+  string end_date = 6;
+  string condition_type = 7;
+  string condition_params = 8; // JSON 형식의 문자열
+  string reward_type = 9;
+  string reward_params = 10; // JSON 형식의 문자열
+  bool requires_approval = 11;
+  int32 version = 12;
+  int32 priority = 13;
+  string created_by = 14;
+  string updated_by = 15;
+  int32 max_rewards_per_user = 16;
+  int32 total_reward_limit = 17;
+  int32 current_reward_count = 18;
+  bool is_deleted = 19;
+  string metadata = 20; // JSON 형식의 문자열
+  string created_at = 21;
+  string updated_at = 22;
+}
+
+message FindAllEventRulesRequest {
+  bool show_inactive = 1;
+}
+
+message EventRulesResponse {
+  bool success = 1;
+  repeated EventRule data = 2;
+}
+
+message EventRuleResponse {
+  bool success = 1;
+  EventRule data = 2;
+}
+
+message CreateEventRuleRequest {
+  string name = 1;
+  string description = 2;
+  bool is_active = 3;
+  string start_date = 4;
+  string end_date = 5;
+  string condition_type = 6;
+  string condition_params = 7; // JSON 형식의 문자열
+  string reward_type = 8;
+  string reward_params = 9; // JSON 형식의 문자열
+  bool requires_approval = 10;
+  int32 priority = 11;
+  int32 max_rewards_per_user = 12;
+  int32 total_reward_limit = 13;
+  string metadata = 14; // JSON 형식의 문자열
+  string user_id = 15; // 요청 사용자
+}
+
+message UpdateEventRuleRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  bool is_active = 4;
+  string start_date = 5;
+  string end_date = 6;
+  string condition_type = 7;
+  string condition_params = 8; // JSON 형식의 문자열
+  string reward_type = 9;
+  string reward_params = 10; // JSON 형식의 문자열
+  bool requires_approval = 11;
+  int32 priority = 12;
+  int32 max_rewards_per_user = 13;
+  int32 total_reward_limit = 14;
+  string metadata = 15; // JSON 형식의 문자열
+  string user_id = 16; // 요청 사용자
+}
+
+message ToggleEventRuleStatusRequest {
+  string id = 1;
+  bool is_active = 2;
+  string user_id = 3;
+}
+
+// 사용자 이벤트 관련 메시지
+message UserEvent {
+  string id = 1;
+  string user_id = 2;
+  string event_type = 3;
+  string event_key = 4;
+  string metadata = 5; // JSON 형식의 문자열
+  string occurred_at = 6;
+  bool processed = 7;
+  string processed_at = 8;
+  repeated string related_redemptions = 9;
+  string idempotency_key = 10;
+  string created_at = 11;
+  string updated_at = 12;
+}
+
+message RecordUserEventRequest {
+  string user_id = 1;
+  string event_type = 2;
+  string metadata = 3; // JSON 형식의 문자열
+  string idempotency_key = 4;
+}
+
+message FindUserEventsRequest {
+  string user_id = 1;
+  string event_type = 2;
+  int32 limit = 3;
+}
+
+message UserEventResponse {
+  bool success = 1;
+  UserEvent data = 2;
+}
+
+message UserEventsResponse {
+  bool success = 1;
+  repeated UserEvent data = 2;
+}
+
+// 보상 관련 메시지
+message Reward {
+  string id = 1;
+  string user_id = 2;
+  string event_rule_id = 3;
+  string reward_type = 4;
+  string reward_data = 5; // JSON 형식의 문자열
+  string status = 6;
+  string requested_at = 7;
+  string processed_at = 8;
+  string approved_by = 9;
+  string rejection_reason = 10;
+  string expires_at = 11;
+  string transaction_id = 12;
+  string metadata = 13; // JSON 형식의 문자열
+  repeated StatusHistory status_history = 14;
+  string created_at = 15;
+  string updated_at = 16;
+}
+
+message StatusHistory {
+  string status = 1;
+  string timestamp = 2;
+  string performed_by = 3;
+  string reason = 4;
+}
+
+message RequestRewardRequest {
+  string user_id = 1;
+  string event_rule_id = 2;
+  string transaction_id = 3;
+}
+
+message ProcessRewardRequest {
+  string id = 1;
+  string operator_id = 2;
+  string reason = 3;
+}
+
+message FindRewardsRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message FindUserRewardsRequest {
+  string user_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message SearchRewardsRequest {
+  string user_id = 1;
+  string event_rule_id = 2;
+  repeated string status = 3;
+  string start_date = 4;
+  string end_date = 5;
+  int32 limit = 6;
+  int32 offset = 7;
+}
+
+message RewardResponse {
+  bool success = 1;
+  Reward data = 2;
+}
+
+message RewardsResponse {
+  bool success = 1;
+  repeated Reward data = 2;
+  int32 total = 3;
+}
+
+message HealthCheckResponse {
+  string status = 1;
+  string service = 2;
+  string timestamp = 3;
+} 

@@ -1,4 +1,4 @@
-import { UserRole } from '@app/libs/common/schema';
+import { UserRole } from '@app/libs/common/enum';
 
 export interface JwtPayload {
   userId: string;

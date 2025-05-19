@@ -1,5 +1,5 @@
 export const JWT_CONSTANTS = {
-  ACCESS_TOKEN_EXPIRY: '5m',
+  ACCESS_TOKEN_EXPIRY: '1h',
   REFRESH_TOKEN_EXPIRY: '7d',
   DEFAULT_ACCESS_SECRET: 'nexon-access-secret',
   DEFAULT_REFRESH_SECRET: 'nexon-refresh-secret',

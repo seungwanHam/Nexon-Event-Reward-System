@@ -2,11 +2,11 @@
  * 애플리케이션 전체에서 사용할 로거 인터페이스
  */
 export interface Logger {
-  log(message: string, context?: string): void;
-  error(message: string, trace?: string, context?: string): void;
-  warn(message: string, context?: string): void;
-  debug(message: string, context?: string): void;
-  verbose(message: string, context?: string): void;
+  log(message: string, metadata?: Record<string, any>): void;
+  error(message: string, metadata?: Record<string, any>): void;
+  warn(message: string, metadata?: Record<string, any>): void;
+  debug(message: string, metadata?: Record<string, any>): void;
+  verbose(message: string, metadata?: Record<string, any>): void;
 }
 
 /**

@@ -1,15 +1,25 @@
-import { Module, Global } from '@nestjs/common';
-import { WinstonLoggerFactory } from './winston-logger.service';
-import { LOGGER_FACTORY } from './logger.interface';
+import { Global, Module } from '@nestjs/common';
+import { WinstonLoggerService } from './winston-logger.service';
+import { LOGGER_FACTORY, LoggerFactory } from './logger.interface';
+
+export class WinstonLoggerFactory implements LoggerFactory {
+  createLogger(context: string) {
+    return new WinstonLoggerService();
+  }
+}
 
 @Global()
 @Module({
   providers: [
     {
+      provide: WinstonLoggerService,
+      useClass: WinstonLoggerService,
+    },
+    {
       provide: LOGGER_FACTORY,
       useClass: WinstonLoggerFactory,
     },
   ],
-  exports: [LOGGER_FACTORY],
+  exports: [WinstonLoggerService, LOGGER_FACTORY],
 })
 export class LoggerModule {} 

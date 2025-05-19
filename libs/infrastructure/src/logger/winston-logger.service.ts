@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { Logger, LoggerFactory } from '@app/libs/infrastructure/logger';
+import { Logger } from './logger.interface';
 import * as winston from 'winston';
 
 /**
  * Winston 기반 로거 구현체
  */
-export class WinstonLogger implements Logger {
+@Injectable()
+export class WinstonLoggerService implements Logger {
   private readonly logger: winston.Logger;
 
-  constructor(private readonly context: string) {
+  constructor() {
     this.logger = winston.createLogger({
       level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
       format: winston.format.combine(
@@ -18,10 +19,9 @@ export class WinstonLogger implements Logger {
           if (Object.keys(metadata).length > 0) {
             metadataStr = JSON.stringify(metadata);
           }
-          return `[${timestamp}] [${this.context}] ${level.toUpperCase()}: ${message} ${metadataStr}`;
+          return `[${timestamp}] ${level.toUpperCase()}: ${message} ${metadataStr}`;
         })
       ),
-      defaultMeta: { service: this.context },
       transports: [
         new winston.transports.Console({
           format: winston.format.combine(
@@ -32,33 +32,23 @@ export class WinstonLogger implements Logger {
     });
   }
 
-  log(message: string, context?: string): void {
-    this.logger.info(message, { context });
+  log(message: string, metadata?: Record<string, any>): void {
+    this.logger.info(message, metadata);
   }
 
-  error(message: string, trace?: string, context?: string): void {
-    this.logger.error(message, { trace, context });
+  error(message: string, metadata?: Record<string, any>): void {
+    this.logger.error(message, metadata);
   }
 
-  warn(message: string, context?: string): void {
-    this.logger.warn(message, { context });
+  warn(message: string, metadata?: Record<string, any>): void {
+    this.logger.warn(message, metadata);
   }
 
-  debug(message: string, context?: string): void {
-    this.logger.debug(message, { context });
+  debug(message: string, metadata?: Record<string, any>): void {
+    this.logger.debug(message, metadata);
   }
 
-  verbose(message: string, context?: string): void {
-    this.logger.verbose(message, { context });
-  }
-}
-
-/**
- * Winston 로거 팩토리 구현체
- */
-@Injectable()
-export class WinstonLoggerFactory implements LoggerFactory {
-  createLogger(context: string): Logger {
-    return new WinstonLogger(context);
+  verbose(message: string, metadata?: Record<string, any>): void {
+    this.logger.verbose(message, metadata);
   }
 } 

@@ -6,12 +6,12 @@ export interface ICacheService {
   /**
    * 캐시에서 값을 가져옵니다.
    */
-  get<T>(key: string): Promise<T | undefined>;
+  get(key: string): Promise<string | null>;
 
   /**
    * 값을 캐시에 저장합니다.
    */
-  set(key: string, value: any, ttl?: number): Promise<void>;
+  set(key: string, value: string, ttl?: number): Promise<void>;
 
   /**
    * 키를 캐시에서 삭제합니다.
@@ -37,7 +37,7 @@ export interface ICacheService {
   /**
    * 캐시가 특정 키를 가지고 있는지 확인합니다.
    */
-  has(key: string): Promise<boolean>;
+  exists(key: string): Promise<boolean>;
 
   /**
    * 캐시에서 값을 가져오거나, 없으면 생성하여 저장합니다.

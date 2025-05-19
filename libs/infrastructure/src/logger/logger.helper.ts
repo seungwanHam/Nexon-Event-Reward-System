@@ -19,11 +19,16 @@ export function createLogger(context: string): Logger {
   if (!tempLoggerFactory) {
     // fallback: 로거 팩토리가 설정되지 않은 경우 콘솔에 출력
     return {
-      log: (message: string) => console.log(`[${context}] ${message}`),
-      error: (message: string, trace?: string) => console.error(`[${context}] ${message}`, trace || ''),
-      warn: (message: string) => console.warn(`[${context}] ${message}`),
-      debug: (message: string) => console.debug(`[${context}] ${message}`),
-      verbose: (message: string) => console.log(`[${context}] VERBOSE: ${message}`),
+      log: (message: string, metadata?: Record<string, any>) => 
+        console.log(`[${context}] ${message}`, metadata || ''),
+      error: (message: string, metadata?: Record<string, any>) => 
+        console.error(`[${context}] ${message}`, metadata || ''),
+      warn: (message: string, metadata?: Record<string, any>) => 
+        console.warn(`[${context}] ${message}`, metadata || ''),
+      debug: (message: string, metadata?: Record<string, any>) => 
+        console.debug(`[${context}] ${message}`, metadata || ''),
+      verbose: (message: string, metadata?: Record<string, any>) => 
+        console.log(`[${context}] VERBOSE: ${message}`, metadata || ''),
     };
   }
   

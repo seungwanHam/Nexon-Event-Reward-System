@@ -1,5 +1,5 @@
 import { UserEntity } from '@app/auth/domain/entity';
-import { UserRole, UserStatus } from '@app/libs/common/schema';
+import { UserRole, UserStatus } from '@app/libs/common/enum';
 
 export interface UserRepository {
   /**

@@ -6,6 +6,8 @@ import { TokenBlacklistRepository } from '@app/auth/domain/repository';
 // DTO
 import {
   RegisterRequestDto,
+  RefreshTokenRequestDto,
+  LogoutRequestDto,
   LoginRequestDto,
   UpdateUserRequestDto,
   AuthResponseDto,
@@ -41,9 +43,9 @@ export class AuthService {
   /**
    * 새로운 사용자를 등록합니다.
    */
-  async register(dto: RegisterRequestDto): Promise<AuthResponseDto> {
+  async register(registerDto: RegisterRequestDto): Promise<AuthResponseDto> {
     // 사용자 생성
-    const newUser = await this.userService.createUser(dto);
+    const newUser = await this.userService.createUser(registerDto);
 
     // 토큰 생성
     const tokens = await this.generateTokens(newUser);
@@ -57,9 +59,11 @@ export class AuthService {
   /**
    * 사용자 로그인을 처리합니다.
    */
-  async login(dto: LoginRequestDto): Promise<AuthResponseDto> {
+  async login(loginDto: LoginRequestDto): Promise<AuthResponseDto> {
+    const { email, password } = loginDto;
+
     // 인증 정보 검증
-    const user = await this.userService.validateUserCredentials(dto.email, dto.password);
+    const user = await this.userService.validateUserCredentials(email, password);
 
     // 로그인 정보 업데이트
     const updatedUser = await this.userService.updateUserLastLogin(user.id);
@@ -76,7 +80,8 @@ export class AuthService {
   /**
    * 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다.
    */
-  async refreshTokens(userId: string, refreshToken: string): Promise<TokenResponseDto> {
+  async refreshTokens(refreshTokenDto: RefreshTokenRequestDto): Promise<TokenResponseDto> {
+    const { userId, refreshToken } = refreshTokenDto;
     const lockKey = `refresh:${userId}`;
     const { success, release } = await this.lockManager.acquireLock(lockKey, {
       retryCount: 3,
@@ -115,13 +120,13 @@ export class AuthService {
   /**
    * 로그아웃 처리를 수행합니다.
    */
-  async logout(userId: string, accessToken?: string): Promise<void> {
+  async logout(dto: LogoutRequestDto): Promise<void> {
     // 리프레시 토큰 제거
-    await this.userService.updateRefreshToken(userId, null);
+    await this.userService.updateRefreshToken(dto.userId, null);
 
     // 액세스 토큰 블랙리스트 처리
-    if (accessToken) {
-      await this.blacklistAccessToken(accessToken);
+    if (dto.accessToken) {
+      await this.blacklistAccessToken(dto.accessToken);
     }
   }
 
@@ -149,9 +154,9 @@ export class AuthService {
   /**
    * 사용자 정보를 업데이트합니다.
    */
-  async updateUser(userId: string, dto: UpdateUserRequestDto): Promise<AuthResponseDto> {
+  async updateUser(userId: string, updateUserDto: UpdateUserRequestDto): Promise<AuthResponseDto> {
     // 사용자 정보 업데이트
-    const updatedUser = await this.userService.updateUser(userId, dto);
+    const updatedUser = await this.userService.updateUser(userId, updateUserDto);
 
     // 토큰 재발급
     const tokens = await this.generateTokens(updatedUser);
@@ -167,7 +172,7 @@ export class AuthService {
    */
   private async generateTokens(user: UserEntity): Promise<TokenResponseDto> {
     const payload = {
-      sub: user.id,
+      userId: user.id,
       email: user.email,
       roles: user.roles,
     };

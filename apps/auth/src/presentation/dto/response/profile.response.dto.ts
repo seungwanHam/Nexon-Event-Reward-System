@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '@app/libs/common/schema';
+import { UserRole, UserStatus } from '@app/libs/common/enum';
 
 export class ProfileResponseDto {
   id: string;

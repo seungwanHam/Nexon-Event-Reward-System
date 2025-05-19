@@ -9,7 +9,7 @@ import { MongoModule, MongoSchemaModule } from '@app/libs/infrastructure/databas
 import * as path from 'path';
 
 // Controllers
-import { AuthHttpController, AuthGrpcController, HealthController } from '@app/auth/presentation/controller';
+import { AuthHttpController, HealthController } from '@app/auth/presentation/controller';
 
 // Facades
 import { AuthFacade } from '@app/auth/application/facade/auth.facade';
@@ -25,6 +25,7 @@ import { USER_REPOSITORY, TOKEN_BLACKLIST_REPOSITORY } from '@app/auth/domain/re
 
 @Module({
   imports: [
+    // 설정 모듈
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [
@@ -38,20 +39,22 @@ import { USER_REPOSITORY, TOKEN_BLACKLIST_REPOSITORY } from '@app/auth/domain/re
       debug: process.env.NODE_ENV === 'development',
     }),
 
+    // 로거 모듈
+    LoggerModule,
+
     LibAuthModule.register({
       accessTokenSecret: process.env.JWT_ACCESS_SECRET,
       refreshTokenSecret: process.env.JWT_REFRESH_SECRET,
       accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '5m',
       refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
     }),
-    // 로거 모듈
-    LoggerModule,
 
-    // 데이터베이스 설정 (인프라 계층 사용)
+    // 데이터베이스 설정
     MongoSchemaModule.forUser(),
 
     // 캐시 설정 (Redis)
     CacheModule.register({
+      type: 'redis',
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT, 10) || 6379,
       password: process.env.REDIS_PASSWORD,
@@ -68,7 +71,7 @@ import { USER_REPOSITORY, TOKEN_BLACKLIST_REPOSITORY } from '@app/auth/domain/re
       retryDelay: 200,
     }, LockType.REDIS),
   ],
-  controllers: [AuthHttpController, AuthGrpcController, HealthController],
+  controllers: [AuthHttpController, HealthController],
   providers: [
     AuthFacade,
     AuthService,
@@ -80,8 +83,8 @@ import { USER_REPOSITORY, TOKEN_BLACKLIST_REPOSITORY } from '@app/auth/domain/re
     {
       provide: TOKEN_BLACKLIST_REPOSITORY,
       useClass: TokenBlacklistRepositoryImpl,
-    },
+    }
   ],
   exports: [AuthFacade],
 })
-export class AuthModule { } 
+export class AuthModule { }

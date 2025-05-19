@@ -1,10 +1,14 @@
 import { Model } from 'mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CacheService } from '@app/libs/infrastructure/cache';
+import { ICacheService, CACHE_SERVICE } from '@app/libs/infrastructure/cache';
+import { UserNotFoundException } from '@app/libs/common/exception';
 
 // Schema
-import { User, UserDocument, UserRole, UserStatus } from '@app/libs/common/schema';
+import { User, UserDocument } from '@app/libs/common/schema';
+
+// Enum
+import { UserRole, UserStatus } from '@app/libs/common/enum';
 
 // Repository
 import { UserRepository } from '@app/auth/domain/repository';
@@ -19,7 +23,7 @@ export class UserRepositoryImpl implements UserRepository {
 
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    private readonly cacheService: CacheService,
+    @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
   ) { }
 
   async create(user: Omit<UserEntity, 'id'>): Promise<UserEntity> {
@@ -44,7 +48,7 @@ export class UserRepositoryImpl implements UserRepository {
 
     const user = await this.userModel.findById(id).exec();
     if (!user) {
-      throw new NotFoundException(`ID ${id}인 사용자를 찾을 수 없습니다`);
+      throw new UserNotFoundException(`ID ${id}인 사용자를 찾을 수 없습니다`);
     }
 
     const userEntity = this.toEntity(user);
@@ -58,7 +62,7 @@ export class UserRepositoryImpl implements UserRepository {
 
     const user = await this.userModel.findOne({ email }).exec();
     if (!user) {
-      throw new NotFoundException(`이메일 ${email}인 사용자를 찾을 수 없습니다`);
+      throw new UserNotFoundException(`이메일 ${email}인 사용자를 찾을 수 없습니다`);
     }
 
     const userEntity = this.toEntity(user);
@@ -118,7 +122,7 @@ export class UserRepositoryImpl implements UserRepository {
     ).exec();
 
     if (!updatedUser) {
-      throw new NotFoundException(`사용자 ID ${user.id}를 찾을 수 없습니다`);
+      throw new UserNotFoundException(`사용자 ID ${user.id}를 찾을 수 없습니다`);
     }
 
     const userEntity = this.toEntity(updatedUser);
@@ -150,20 +154,28 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   private async getCachedUser(cacheKey: string): Promise<UserEntity | null> {
-    const cached = await this.cacheService.get<Record<string, any>>(cacheKey);
-    return cached ? UserEntity.create(cached) : null;
+    const cached = await this.cacheService.get(cacheKey);
+    if (!cached) return null;
+
+    try {
+      const userData = JSON.parse(cached);
+      return UserEntity.create(userData);
+    } catch (error) {
+      return null;
+    }
   }
 
   private async updateCache(user: UserEntity): Promise<void> {
+    const userData = JSON.stringify(user);
     const promises = [
       this.cacheService.set(
         `${this.USER_CACHE_PREFIX}id:${user.id}`,
-        user,
+        userData,
         this.USER_CACHE_TTL
       ),
       this.cacheService.set(
         `${this.USER_CACHE_PREFIX}email:${user.email}`,
-        user,
+        userData,
         this.USER_CACHE_TTL
       )
     ];

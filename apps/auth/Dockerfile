@@ -13,7 +13,6 @@ RUN npm install
 # 소스 복사
 COPY apps/auth ./apps/auth
 COPY libs ./libs
-COPY proto ./proto
 
 # 빌드
 RUN npm run build:auth

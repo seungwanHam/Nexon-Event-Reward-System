@@ -1,5 +1,5 @@
-import { IsString, IsEmail, IsOptional, MinLength, IsArray, IsEnum, Matches } from 'class-validator';
-import { UserRole } from '@app/libs/common/schema';
+import { IsEmail, IsString, IsOptional, IsArray, MinLength, IsEnum, Matches } from 'class-validator';
+import { UserRole } from '@app/libs/common/enum';
 
 export class RegisterRequestDto {
   @IsEmail({}, { message: '유효한 이메일 주소를 입력해주세요.' })
@@ -17,8 +17,8 @@ export class RegisterRequestDto {
   @MinLength(2, { message: '닉네임은 최소 2자 이상이어야 합니다.' })
   nickname: string;
 
-  @IsArray()
-  @IsEnum(UserRole, { each: true })
   @IsOptional()
+  @IsArray()
+  @IsEnum(UserRole, { each: true, message: '유효하지 않은 권한입니다.' })
   roles?: UserRole[] = [UserRole.USER];
 } 

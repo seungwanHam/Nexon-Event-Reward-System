@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '@app/libs/common/schema';
+import { UserRole, UserStatus } from '@app/libs/common/enum';
 import { InvalidStatusTransitionException, InvalidRoleAssignmentException } from '@app/libs/common/exception';
 
 export class UserEntity {

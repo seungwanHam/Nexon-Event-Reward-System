@@ -3,7 +3,9 @@ import { Injectable, Logger } from '@nestjs/common';
 // DTO
 import {
   RegisterRequestDto,
+  RefreshTokenRequestDto,
   LoginRequestDto,
+  LogoutRequestDto,
   UpdateUserRequestDto,
   AuthResponseDto,
   TokenResponseDto,
@@ -36,36 +38,36 @@ export class AuthFacade {
    * 회원가입 처리
    * RegisterRequestDto를 받아 인증 서비스로 전달하고 결과를 반환
    */
-  async register(dto: RegisterRequestDto): Promise<AuthResponseDto> {
-    this.logger.debug(`회원가입 요청 처리: ${dto.email}`);
-    return this.authService.register(dto);
+  async register(registerDto: RegisterRequestDto): Promise<AuthResponseDto> {
+    this.logger.debug(`회원가입 요청 처리: ${registerDto.email}`);
+    return this.authService.register(registerDto);
   }
 
   /**
    * 로그인 처리
    * 인증 서비스에 위임하여 로그인 처리 후 결과 반환
    */
-  async login(dto: LoginRequestDto): Promise<AuthResponseDto> {
-    this.logger.debug(`로그인 요청 처리: ${dto.email}`);
-    return this.authService.login(dto);
+  async login(loginDto: LoginRequestDto): Promise<AuthResponseDto> {
+    this.logger.debug(`로그인 요청 처리: ${loginDto.email}`);
+    return this.authService.login(loginDto);
   }
 
   /**
    * 토큰 갱신
    * 리프레시 토큰을 사용하여 새로운 액세스 토큰 발급
    */
-  async refreshTokens(userId: string, refreshToken: string): Promise<TokenResponseDto> {
-    this.logger.debug(`토큰 갱신 요청 처리: ${userId}`);
-    return this.authService.refreshTokens(userId, refreshToken);
+  async refreshTokens(refreshTokenDto: RefreshTokenRequestDto): Promise<TokenResponseDto> {
+    this.logger.debug(`토큰 갱신 요청 처리: ${refreshTokenDto.userId}`);
+    return this.authService.refreshTokens(refreshTokenDto);
   }
 
   /**
    * 로그아웃
    * 사용자의 리프레시 토큰을 무효화
    */
-  async logout(userId: string, accessToken?: string): Promise<void> {
-    this.logger.debug(`로그아웃 요청 처리: ${userId}`);
-    await this.authService.logout(userId, accessToken);
+  async logout(dto: LogoutRequestDto): Promise<void> {
+    this.logger.debug(`로그아웃 요청 처리: ${dto.userId}`);
+    await this.authService.logout({ ...dto });
   }
 
   /**
@@ -81,9 +83,9 @@ export class AuthFacade {
    * 사용자 정보 업데이트
    * 변경된 사용자 정보를 검증하고 업데이트
    */
-  async updateUser(userId: string, dto: UpdateUserRequestDto): Promise<AuthResponseDto> {
+  async updateUser(userId: string, updateUserDto: UpdateUserRequestDto): Promise<AuthResponseDto> {
     this.logger.debug(`사용자 정보 업데이트 요청 처리: ${userId}`);
-    return this.authService.updateUser(userId, dto);
+    return this.authService.updateUser(userId, updateUserDto);
   }
 
   /**

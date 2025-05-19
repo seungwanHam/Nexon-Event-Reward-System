@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { CacheService } from '@app/libs/infrastructure/cache';
+import { Injectable, Inject } from '@nestjs/common';
+import { ICacheService, CACHE_SERVICE } from '@app/libs/infrastructure/cache';
 import { TokenBlacklistRepository } from '@app/auth/domain/repository';
 import { InvalidTokenException } from '@app/libs/common/exception';
 
@@ -8,21 +8,24 @@ export class TokenBlacklistRepositoryImpl implements TokenBlacklistRepository {
   private readonly PREFIX = 'blacklist:token:';
   private readonly USER_PREFIX = 'blacklist:user:';
 
-  constructor(private readonly cacheService: CacheService) { }
+  constructor(
+    @Inject(CACHE_SERVICE)
+    private readonly cacheService: ICacheService,
+  ) {}
 
   async addToBlacklist(token: string, expiryInSeconds: number): Promise<void> {
     const key = this.getTokenKey(token);
-    const exists = await this.cacheService.has(key);
+    const exists = await this.cacheService.exists(key);
 
     if (exists) {
       throw new InvalidTokenException('토큰이 이미 블랙리스트에 있습니다');
     }
 
-    await this.cacheService.set(key, true, expiryInSeconds);
+    await this.cacheService.set(key, 'true', expiryInSeconds);
   }
 
   async isBlacklisted(token: string): Promise<boolean> {
-    return await this.cacheService.has(this.getTokenKey(token));
+    return await this.cacheService.exists(this.getTokenKey(token));
   }
 
   async cleanupExpiredTokens(): Promise<number> {
@@ -32,7 +35,7 @@ export class TokenBlacklistRepositoryImpl implements TokenBlacklistRepository {
 
   async blacklistUserTokens(userId: string, expiryInSeconds: number): Promise<void> {
     const userKey = this.getUserKey(userId);
-    await this.cacheService.set(userKey, true, expiryInSeconds);
+    await this.cacheService.set(userKey, 'true', expiryInSeconds);
   }
 
   async getBlacklistSize(): Promise<number> {

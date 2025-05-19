@@ -2,7 +2,17 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": false,
-    "outDir": "../../dist/apps/gateway"
+    "outDir": "../../dist/apps/gateway",
+    "paths": {
+      "@app/gateway/domain/*": ["apps/gateway/src/domain/*"],
+      "@app/gateway/application/*": ["apps/gateway/src/application/*"],
+      "@app/gateway/infrastructure/*": ["apps/gateway/src/infrastructure/*"],
+      "@app/gateway/presentation/*": ["apps/gateway/src/presentation/*"],
+      "@app/gateway/constants/*": ["apps/gateway/src/constants/*"],
+      "@app/libs/auth/*": ["libs/auth/src/*"],
+      "@app/libs/common/*": ["libs/common/src/*"],
+      "@app/libs/infrastructure/*": ["libs/infrastructure/src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]

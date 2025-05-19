@@ -2,7 +2,16 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": false,
-    "outDir": "../../dist/apps/auth"
+    "outDir": "../../dist/apps/auth",
+    "paths": {
+      "@app/auth/domain/*": ["apps/auth/src/domain/*"],
+      "@app/auth/application/*": ["apps/auth/src/application/*"],
+      "@app/auth/infrastructure/*": ["apps/auth/src/infrastructure/*"],
+      "@app/auth/presentation/*": ["apps/auth/src/presentation/*"],
+      "@app/libs/auth/*": ["libs/auth/src/*"],
+      "@app/libs/common/*": ["libs/common/src/*"],
+      "@app/libs/infrastructure/*": ["libs/infrastructure/src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]

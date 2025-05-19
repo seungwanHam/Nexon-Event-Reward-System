@@ -12,5 +12,8 @@ module.exports = {
   moduleNameMapper: {
     '^@app/common(|/.*)$': '<rootDir>/../../libs/common/src/$1',
     '^@app/infrastructure(|/.*)$': '<rootDir>/../../libs/infrastructure/src/$1',
+    '^@app/auth(|/.*)$': '<rootDir>/src/$1',
+    '^@app/auth/domain/entity$': '<rootDir>/src/domain/entity',
+    '^@app/auth/domain/entity/(.*)$': '<rootDir>/src/domain/entity/$1'
   },
 }; 

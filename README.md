@@ -9,7 +9,7 @@
 5. [구현 고려사항 및 설계 결정](#구현-고려사항-및-설계-결정)
 6. [시작하기](#시작하기)
 7. [API 문서](#api-문서)
-8.  [결론 및 향후 계획](#결론-및-향후-계획)
+8. [향후 발전 방향](#향후-발전-방향)
 
 ---
 
@@ -285,8 +285,15 @@ docker ps
 
 # 서비스 확인:
 - Gateway API: http://localhost:3000
-- Auth Service: http://localhost:3001
-- Event Service: http://localhost:3002
+- MongoDB: localhost:27017
+- MongoDB Express(관리자 UI): http://localhost:8081
+- Redis: localhost:6379
+
+### MongoDB 접속 방법
+- **MongoDB Express**: http://localhost:8081 접속하여 웹 기반 관리 도구 사용
+- **MongoDB Compass**: MongoDB 공식 GUI 도구를 사용하여 `mongodb://localhost:27017` 주소로 연결
+- **MongoDB Shell**: 커맨드라인에서 `mongosh mongodb://localhost:27017/nexon-event-system` 명령어로 연결
+
 ```
 
 #### 자동화된 통합 테스트 실행하기
@@ -298,26 +305,109 @@ docker ps
 3. 이벤트, 보상 생성 및 관리 (회원가입, 로그인 기반 이벤트 및 보상)
 4. 보상 청구 및 승인 프로세스 (수동, 자동)
 5. 중복 요청 방지 검증
-6. 감시자 역할 검증
+6. 감사자 역할 검증
+
+| ![통합 테스트 실행 결과 1](./docs/AUTOMATED_INTEGRATION_TEST_01.png) | ![통합 테스트 실행 결과 2](./docs/AUTOMATED_INTEGRATION_TEST_02.png) |
+|:---:|:---:|
+| 통합 테스트 실행 결과 1 | 통합 테스트 실행 결과 2 |
 
 ## API 문서
 
 각 서비스에 대한 Swagger API 문서를 제공합니다:
 
 - Gateway API Docs: http://localhost:3000/api/docs
-- local curl Test guide: link
+- local curl Test guide: [MANUAL_API_TEST_GUIDE](./docs/MANUAL_API_TEST_GUIDE.md)
 
 
-## 결론 및 향후 계획
+## 향후 발전 방향
+1. **Redis 고가용성 아키텍처 구현**
+   - Master-Slave 복제 구조 도입으로 읽기 성능 향상
+   - Redis Sentinel으로 자동 장애 복구 체계 구축
 
-이 프로젝트를 통해 제가 중요하게 생각하는 개발 원칙들을 적용할 수 있었습니다:
-1. 다이어그램 기반 설계로 시스템 구조 명확화
-2. TDD 방식으로 견고한 코드베이스 구축
-3. 마이크로서비스 아키텍처를 통한 확장성 확보
-4. 실제 운영 환경을 고려한 프로덕션 레벨 설계
+2. **메시지 큐 시스템 고도화**
+   - Kafka 기반 이벤트 스트리밍 플랫폼 구축
+   - 분산 트랜잭션 관리 및 이벤트 소싱 패턴 적용
+   - 실시간 이벤트 처리 파이프라인 구축
 
-향후 발전 방향으로는:
-1. 백오피스 UI 개발 (React + TypeScript)
-2. 실시간 알림 시스템 구현 (Socket.io)
-3. 성능 테스트 및 최적화 작업
-4. CI/CD 파이프라인 구축 (GitHub Actions)
+3. **룰 기반 엔진 고도화**
+   - 동적 규칙 정의 DSL(Domain Specific Language) 개발
+   - 규칙 시뮬레이션 및 테스트 도구 개발
+   - 이상 탐지 시스템 연동
+
+4. **실시간 알림 시스템 구현**
+   - Socket.io 기반 실시간 이벤트 알림
+   - 푸시 알림 및 이메일 연동 시스템 구축
+   - 알림 선호도 설정 및 개인화 기능
+
+이러한 향후 계획들은 실제 프로덕션 환경에서 발생할 수 있는 기술적 도전과 대규모 사용자 기반을 지원하기 위한 확장성 요구사항을 고려하여 설계되었습니다.
+
+초기에는 아래와 같은 마이크로서비스 아키텍처를 설계했으나, 프로젝트 자원 제약으로 인해 일부 기능은 확장성을 고려한 인터페이스와 기본 구현체만 개발하였습니다. 향후 시스템 확장 시 이러한 기반을 활용하여 완전한 기능 구현이 가능하도록 설계하였습니다.
+
+```mermaid
+flowchart TD
+    %% 클라이언트 노드
+    Client(["👨‍💼 클라이언트 앱"]):::clientNode
+    BackOffice(["👨‍💻 백오피스 UI"]):::clientNode
+    
+    %% 클라이언트 연결
+    Client -- "HTTP 요청" --> Gateway
+    BackOffice -- "HTTP 요청" --> Gateway
+    
+    %% API 계층
+    subgraph ApiLayer["🌐 API Layer"]
+        Gateway[("API Gateway<br/>NestJS")]:::gatewayNode
+    end
+    
+    %% 서비스 계층
+    subgraph ServiceLayer["🔐 Service Layer"]
+        Auth["🔑 Auth Service<br/>(사용자/인증)"]:::serviceNode
+        Event["🎮 Event Service<br/>(이벤트/보상)"]:::serviceNode
+    end
+    
+    %% 데이터 계층
+    subgraph DataLayer["💾 Infrastructure"]
+        MongoDB[(MongoDB<br/>데이터 저장)]:::dbNode
+        Redis[(Redis<br/>캐시/락)]:::cacheNode
+        EventBus["📨 Event Bus"]:::eventNode
+    end
+    
+    %% 서비스 내부 모듈
+    subgraph EventModules["🧩 Event Service Modules"]
+        RuleEngine["⚙️ Rule Engine"]:::moduleNode
+        RewardModule["🏆 Reward Module"]:::moduleNode
+        ValidationModule["✅ Validation Module"]:::moduleNode
+    end
+    
+    %% 주요 연결
+    Gateway -- "인증/권한" --> Auth
+    Gateway -- "이벤트/보상" --> Event
+    Auth -- "유저 데이터" --> MongoDB
+    Event -- "이벤트 데이터" --> MongoDB
+    Event -- "캐싱/분산락" --> Redis
+    Auth -- "세션 데이터" --> Redis
+    
+    %% 이벤트 기반 통신
+    Auth <---> |"이벤트 발행/구독"| EventBus
+    Event <---> |"이벤트 발행/구독"| EventBus
+    
+    %% 모듈 연결
+    Event --- RuleEngine
+    Event --- RewardModule
+    Event --- ValidationModule
+    
+    %% 스타일 정의
+    classDef clientNode fill:#ff9eb1,stroke:#333,stroke-width:2px,color:#333,font-weight:bold
+    classDef gatewayNode fill:#9ea1ff,stroke:#333,stroke-width:2px,color:#333,font-weight:bold
+    classDef serviceNode fill:#a1ffb0,stroke:#333,stroke-width:2px,color:#333,font-weight:bold
+    classDef dbNode fill:#ffcc9e,stroke:#333,stroke-width:3px,color:#333,font-weight:bold
+    classDef cacheNode fill:#9eceff,stroke:#333,stroke-width:3px,color:#333,font-weight:bold
+    classDef moduleNode fill:#f9f39e,stroke:#333,stroke-width:2px,color:#333,font-weight:bold
+    classDef eventNode fill:#dda1ff,stroke:#333,stroke-width:2px,color:#333,font-weight:bold
+    
+    %% 서브그래프 스타일
+    style ApiLayer fill:#f0f0f0,stroke:#333,stroke-width:2px
+    style ServiceLayer fill:#f0f0f0,stroke:#333,stroke-width:2px
+    style DataLayer fill:#f0f0f0,stroke:#333,stroke-width:2px
+    style EventModules fill:#f0f0f0,stroke:#333,stroke-width:2px
+```
+

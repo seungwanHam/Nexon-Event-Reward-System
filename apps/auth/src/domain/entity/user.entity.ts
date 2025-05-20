@@ -1,5 +1,9 @@
-import { UserRole, UserStatus } from '@app/libs/common/enum';
-import { InvalidStatusTransitionException, InvalidRoleAssignmentException } from '@app/libs/common/exception';
+import { UserRole, UserStatus } from '../../../../../libs/common/src/enum';
+import { 
+  InvalidStatusTransitionException, 
+  InvalidRoleAssignmentException, 
+  ValidationException 
+} from '../../../../../libs/common/src/exception';
 
 export class UserEntity {
   readonly id: string;
@@ -15,6 +19,8 @@ export class UserEntity {
   metadata: Record<string, any>;
   readonly createdAt: Date;
   updatedAt: Date;
+  publicId?: string;
+  statusChangedAt?: Date;
 
   private constructor(props: Partial<UserEntity>) {
     this.id = props.id;
@@ -30,17 +36,66 @@ export class UserEntity {
     this.metadata = props.metadata || {};
     this.createdAt = props.createdAt || new Date();
     this.updatedAt = props.updatedAt || new Date();
+    this.publicId = props.publicId;
+    this.statusChangedAt = props.statusChangedAt;
   }
 
   /**
    * 새로운 사용자 엔티티를 생성합니다.
+   * @throws {ValidationException} 유효성 검증에 실패한 경우
    */
   static create(props: Partial<UserEntity>): UserEntity {
-    return new UserEntity(props);
+    const user = new UserEntity(props);
+    user.validate();
+    return user;
+  }
+
+  /**
+   * 사용자 엔티티의 유효성을 검증합니다.
+   * @throws {ValidationException} 유효성 검증에 실패한 경우
+   */
+  private validate(): void {
+    // 필수 필드 검증
+    if (!this.email) {
+      throw new ValidationException('이메일은 필수 입력 사항입니다.');
+    }
+
+    if (!this.nickname) {
+      throw new ValidationException('닉네임은 필수 입력 사항입니다.');
+    }
+
+    // 이메일 형식 검증
+    if (!this.isValidEmail(this.email)) {
+      throw new ValidationException('유효하지 않은 이메일 형식입니다.');
+    }
+
+    // 닉네임 길이 검증
+    if (this.nickname.length < 2 || this.nickname.length > 20) {
+      throw new ValidationException('닉네임은 2자 이상 20자 이하여야 합니다.');
+    }
+
+    // 역할 검증
+    if (!this.roles || this.roles.length === 0) {
+      throw new ValidationException('최소 하나 이상의 역할이 필요합니다.');
+    }
+
+    // 역할 할당 규칙 검증
+    if (!this.isValidRoleAssignment(this.roles)) {
+      throw new ValidationException('유효하지 않은 역할 할당입니다.');
+    }
+  }
+
+  /**
+   * 이메일 형식이 유효한지 검증합니다.
+   */
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
   }
 
   /**
    * 사용자의 로그인 정보를 업데이트합니다.
+   * @throws {InvalidStatusTransitionException} 비활성화된 사용자인 경우
    */
   updateLoginInfo(): void {
     if (!this.isActive()) {
@@ -60,6 +115,7 @@ export class UserEntity {
 
   /**
    * 사용자 상태를 변경합니다.
+   * @throws {InvalidStatusTransitionException} 유효하지 않은 상태 전이인 경우
    */
   changeStatus(newStatus: UserStatus): void {
     // 상태 전이 규칙 검증
@@ -67,11 +123,13 @@ export class UserEntity {
       throw new InvalidStatusTransitionException('잘못된 상태 전이입니다.');
     }
     this.status = newStatus;
+    this.statusChangedAt = new Date();
     this.updatedAt = new Date();
   }
 
   /**
    * 사용자 역할을 업데이트합니다.
+   * @throws {InvalidRoleAssignmentException} 유효하지 않은 역할 할당인 경우
    */
   updateRoles(newRoles: UserRole[]): void {
     // 역할 검증
@@ -84,17 +142,27 @@ export class UserEntity {
 
   /**
    * 사용자 정보를 업데이트합니다.
+   * @throws {ValidationException} 유효성 검증에 실패한 경우
    */
   update(props: Partial<Omit<UserEntity, 'id' | 'createdAt'>>): void {
+    const oldEmail = this.email;
+    const oldNickname = this.nickname;
+
     if (props.email) this.email = props.email;
     if (props.nickname) this.nickname = props.nickname;
     if (props.passwordHash) this.passwordHash = props.passwordHash;
     if (props.metadata) this.metadata = { ...this.metadata, ...props.metadata };
     this.updatedAt = new Date();
+
+    // 이메일이나 닉네임이 변경된 경우 유효성 검증
+    if (oldEmail !== this.email || oldNickname !== this.nickname) {
+      this.validate();
+    }
   }
 
   /**
    * 초대 코드를 생성합니다.
+   * @throws {InvalidStatusTransitionException} 비활성화된 사용자인 경우
    */
   generateInviteCode(): string {
     if (!this.isActive()) {
@@ -118,16 +186,27 @@ export class UserEntity {
     this.updatedAt = new Date();
   }
 
-  // 상태 검증 메서드들
+  /**
+   * 사용자가 활성 상태인지 확인합니다.
+   */
   isActive(): boolean {
     return this.status === UserStatus.ACTIVE;
   }
 
+  /**
+   * 사용자가 특정 역할을 가지고 있는지 확인합니다.
+   */
   hasRole(role: UserRole): boolean {
     return this.roles.includes(role);
   }
 
+  /**
+   * 상태 전이가 유효한지 검증합니다.
+   */
   private isValidStatusTransition(newStatus: UserStatus): boolean {
+    // 같은 상태로 변경하는 경우는 허용
+    if (this.status === newStatus) return true;
+
     // 상태 전이 규칙 정의
     const validTransitions = {
       [UserStatus.PENDING]: [UserStatus.ACTIVE, UserStatus.INACTIVE],
@@ -139,7 +218,13 @@ export class UserEntity {
     return validTransitions[this.status]?.includes(newStatus) ?? false;
   }
 
+  /**
+   * 역할 할당이 유효한지 검증합니다.
+   */
   private isValidRoleAssignment(roles: UserRole[]): boolean {
+    // 빈 역할 배열은 허용하지 않음
+    if (roles.length === 0) return false;
+
     // 역할 할당 규칙 정의
     const hasAdmin = roles.includes(UserRole.ADMIN);
     const hasUser = roles.includes(UserRole.USER);

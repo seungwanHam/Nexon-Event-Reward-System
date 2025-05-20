@@ -1,17 +1,23 @@
 import * as bcrypt from 'bcrypt';
 import { Inject, Injectable } from '@nestjs/common';
-import { RegisterRequestDto, UpdateUserRequestDto, ProfileResponseDto } from '@app/auth/presentation/dto';
-import { UserRepository, USER_REPOSITORY } from '@app/auth/domain/repository';
-import { UserEntity } from '@app/auth/domain/entity';
-import { UserStatus } from '@app/libs/common/enum';
+import { RegisterRequestDto, UpdateUserRequestDto, ProfileResponseDto } from '../../presentation/dto';
+import { UserRepository, USER_REPOSITORY } from '../../domain/repository';
+import { UserEntity } from '../../domain/entity';
+import { UserStatus } from '../../../../../libs/common/src/enum';
 import {
   EmailAlreadyExistsException,
   InvalidCredentialsException,
   UserNotFoundException,
   InvalidUserStatusException
-} from '@app/libs/common/exception';
-import { WinstonLoggerService } from '@app/libs/infrastructure/logger';
+} from '../../../../../libs/common/src/exception';
+import { WinstonLoggerService } from '../../../../../libs/infrastructure/src/logger';
 
+/**
+ * 사용자 서비스
+ * 
+ * 사용자 관리, 인증, 프로필 관련 비즈니스 로직을 처리하는 도메인 서비스입니다.
+ * 사용자 생성, 조회, 수정, 인증 검증 등의 기능을 담당합니다.
+ */
 @Injectable()
 export class UserService {
   constructor(
@@ -22,6 +28,12 @@ export class UserService {
 
   /**
    * 새로운 사용자를 생성합니다.
+   * 
+   * 이메일 중복을 검사하고, 비밀번호를 해싱하여 새로운 사용자를 저장합니다.
+   * 
+   * @param registerDto - 사용자 등록 정보가 담긴 DTO
+   * @returns 생성된 사용자 엔티티
+   * @throws EmailAlreadyExistsException - 이미 등록된 이메일인 경우
    */
   async createUser(registerDto: RegisterRequestDto): Promise<UserEntity> {
     try {
@@ -78,6 +90,10 @@ export class UserService {
 
   /**
    * ID로 사용자를 조회합니다.
+   * 
+   * @param userId - 조회할 사용자 ID
+   * @returns 조회된 사용자 엔티티
+   * @throws UserNotFoundException - 사용자를 찾을 수 없는 경우
    */
   async findUserById(userId: string): Promise<UserEntity> {
     const user = await this.userRepository.findById(userId);
@@ -94,6 +110,10 @@ export class UserService {
 
   /**
    * 이메일로 사용자를 조회합니다.
+   * 
+   * @param email - 조회할 사용자 이메일
+   * @returns 조회된 사용자 엔티티
+   * @throws UserNotFoundException - 사용자를 찾을 수 없는 경우
    */
   async findUserByEmail(email: string): Promise<UserEntity> {
     const user = await this.userRepository.findByEmail(email);
@@ -110,6 +130,9 @@ export class UserService {
 
   /**
    * 사용자의 마지막 로그인 시간을 업데이트합니다.
+   * 
+   * @param userId - 업데이트할 사용자 ID
+   * @returns 업데이트된 사용자 엔티티
    */
   async updateUserLastLogin(userId: string): Promise<UserEntity> {
     const user = await this.findUserById(userId);
@@ -123,6 +146,9 @@ export class UserService {
 
   /**
    * 사용자의 리프레시 토큰을 업데이트합니다.
+   * 
+   * @param userId - 업데이트할 사용자 ID
+   * @param refreshToken - 새 리프레시 토큰 (null이면 토큰 제거)
    */
   async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
     const user = await this.findUserById(userId);
@@ -139,6 +165,10 @@ export class UserService {
 
   /**
    * 리프레시 토큰의 유효성을 검증합니다.
+   * 
+   * @param refreshToken - 검증할 리프레시 토큰
+   * @param hashedRefreshToken - 저장된 해시된 리프레시 토큰
+   * @returns 토큰 유효성 여부
    */
   async validateRefreshToken(refreshToken: string, hashedRefreshToken: string): Promise<boolean> {
     return bcrypt.compare(refreshToken, hashedRefreshToken);
@@ -146,6 +176,14 @@ export class UserService {
 
   /**
    * 사용자 인증 정보를 검증합니다.
+   * 
+   * 이메일과 비밀번호를 검증하고, 사용자 상태를 확인합니다.
+   * 
+   * @param email - 인증할 사용자 이메일
+   * @param password - 인증할 비밀번호
+   * @returns 인증된 사용자 엔티티
+   * @throws InvalidCredentialsException - 인증 정보가 유효하지 않은 경우
+   * @throws InvalidUserStatusException - 사용자 상태가 유효하지 않은 경우
    */
   async validateUserCredentials(email: string, password: string): Promise<UserEntity> {
     const user = await this.findUserByEmail(email);
@@ -176,6 +214,13 @@ export class UserService {
 
   /**
    * 사용자 정보를 업데이트합니다.
+   * 
+   * 이메일, 닉네임, 비밀번호, 역할, 상태 등을 업데이트합니다.
+   * 
+   * @param userId - 업데이트할 사용자 ID
+   * @param updateUserDto - 업데이트할 정보가 담긴 DTO
+   * @returns 업데이트된 사용자 엔티티
+   * @throws EmailAlreadyExistsException - 변경하려는 이메일이 이미 등록된 경우
    */
   async updateUser(userId: string, updateUserDto: UpdateUserRequestDto): Promise<UserEntity> {
     const { email, nickname, password, roles, status, metadata } = updateUserDto;
@@ -224,11 +269,12 @@ export class UserService {
 
   /**
    * 사용자 프로필을 조회합니다.
+   * 
+   * @param userId - 조회할 사용자 ID
+   * @returns 사용자 프로필 정보
    */
   async getUserProfile(userId: string): Promise<ProfileResponseDto> {
     const user = await this.findUserById(userId);
-
-
 
     return {
       id: user.id,
@@ -237,14 +283,16 @@ export class UserService {
       roles: user.roles,
       status: user.status,
       metadata: user.metadata,
-      lastLoginAt: new Date(user.lastLoginAt)?.toISOString(),
-      createdAt: new Date(user.createdAt)?.toISOString(),
-      updatedAt: new Date(user.updatedAt)?.toISOString(),
+      lastLoginAt: user.lastLoginAt?.toISOString(),
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
     };
   }
 
   /**
    * 모든 사용자를 조회합니다.
+   * 
+   * @returns 모든 사용자 엔티티 목록
    */
   async findAllUsers(): Promise<UserEntity[]> {
     return await this.userRepository.findAll();
@@ -252,13 +300,23 @@ export class UserService {
 
   /**
    * 비밀번호를 해싱합니다.
+   * 
+   * @param password - 해싱할 비밀번호
+   * @returns 해싱된 비밀번호
+   * @private
    */
   private async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, 10);
+    const saltRounds = 10;
+    return bcrypt.hash(password, saltRounds);
   }
 
   /**
-   * 비밀번호를 검증합니다.
+   * 비밀번호의 유효성을 검증합니다.
+   * 
+   * @param password - 검증할 비밀번호
+   * @param hash - 저장된 해시된 비밀번호
+   * @returns 비밀번호 유효성 여부
+   * @private
    */
   private async validatePassword(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);

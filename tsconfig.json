@@ -18,10 +18,20 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@app/common": ["libs/common/src"],
-      "@app/common/*": ["libs/common/src/*"],
+      "@app/libs/auth": ["libs/auth/src"],
+      "@app/libs/auth/*": ["libs/auth/src/*"],
+      "@app/libs/common": ["libs/common/src"],
+      "@app/libs/common/*": ["libs/common/src/*"],
+      "@app/libs/infrastructure": ["libs/infrastructure/src"],
+      "@app/libs/infrastructure/*": ["libs/infrastructure/src/*"],
       "@app/infrastructure": ["libs/infrastructure/src"],
-      "@app/infrastructure/*": ["libs/infrastructure/src/*"]
+      "@app/infrastructure/*": ["libs/infrastructure/src/*"],
+      "@app/auth": ["apps/auth/src"],
+      "@app/auth/*": ["apps/auth/src/*"],
+      "@app/event": ["apps/event/src"],
+      "@app/event/*": ["apps/event/src/*"],
+      "@app/gateway": ["apps/gateway/src"],
+      "@app/gateway/*": ["apps/gateway/src/*"]
     }
   }
 }

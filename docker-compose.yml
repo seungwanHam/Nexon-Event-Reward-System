@@ -1,71 +1,11 @@
 version: '3.8'
 
 services:
-  gateway:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - SERVICE=gateway
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - AUTH_SERVICE_HOST=auth
-      - AUTH_SERVICE_PORT=3001
-      - EVENT_SERVICE_HOST=event
-      - EVENT_SERVICE_PORT=3002
-      - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
-    volumes:
-      - ./:/app
-      - /app/node_modules
-    depends_on:
-      - auth
-      - event
-      - mongodb
-    networks:
-      - nexon-network
-
-  auth:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - SERVICE=auth
-    ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
-    volumes:
-      - ./:/app
-      - /app/node_modules
-    depends_on:
-      - mongodb
-    networks:
-      - nexon-network
-
-  event:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - SERVICE=event
-    ports:
-      - "3002:3002"
-    environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
-    volumes:
-      - ./:/app
-      - /app/node_modules
-    depends_on:
-      - mongodb
-    networks:
-      - nexon-network
-
+  # MongoDB
   mongodb:
     image: mongo:6-jammy
+    container_name: nexon-mongodb
+    restart: always
     ports:
       - "27017:27017"
     volumes:
@@ -86,9 +26,88 @@ services:
     networks:
       - nexon-network
 
+  # Redis for caching and lock manager
+  redis:
+    image: redis:latest
+    container_name: nexon-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - nexon-network
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+    container_name: nexon-auth-service
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_ACCESS_SECRET=nexon-access-secret
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_SECRET=nexon-refresh-secret
+      - JWT_REFRESH_EXPIRY=7d
+      - EVENT_SERVICE_URL=http://event-service:3002
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - nexon-network
+
+  # Event Service
+  event-service:
+    build:
+      context: .
+      dockerfile: apps/event/Dockerfile
+    container_name: nexon-event-service
+    restart: always
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mongodb
+      - redis
+      - auth-service
+    networks:
+      - nexon-network
+
+  # Gateway Service
+  gateway-service:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    container_name: nexon-gateway-service
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - EVENT_SERVICE_URL=http://event-service:3002
+      - JWT_ACCESS_SECRET=nexon-access-secret
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_SECRET=nexon-refresh-secret
+      - JWT_REFRESH_EXPIRY=7d
+    depends_on:
+      - auth-service
+      - event-service
+    networks:
+      - nexon-network
+
+volumes:
+  mongodb_data:
+
 networks:
   nexon-network:
     driver: bridge
-
-volumes:
-  mongodb_data: 

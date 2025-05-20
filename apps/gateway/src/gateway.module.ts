@@ -7,7 +7,7 @@ import * as path from 'path';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 
 // Controllers
-import { GatewayController } from './presentation/controller/gateway.controller';
+import { AuthController } from './presentation/controller/auth.controller';
 import { HealthController } from './presentation/controller/health.controller';
 import { EventController } from './presentation/controller/event.controller';
 import { ClaimController } from './presentation/controller/claim.controller';
@@ -54,8 +54,8 @@ import { HttpErrorInterceptor } from '@app/libs/infrastructure/interceptor';
     }),
   ],
   controllers: [
-    GatewayController, 
-    HealthController, 
+    AuthController,
+    HealthController,
     EventController,
     ClaimController,
     RewardController,
@@ -65,15 +65,15 @@ import { HttpErrorInterceptor } from '@app/libs/infrastructure/interceptor';
     // Facade
     AuthFacade,
     EventFacade,
-    
+
     // HTTP Clients
     AuthHttpClient,
     EventHttpClient,
-    
+
     // Auth
     JwtStrategy,
     JwtRefreshStrategy,
-    
+
     // Interceptors
     {
       provide: APP_INTERCEPTOR,

@@ -28,7 +28,43 @@ export class EventController {
   @ApiQuery({ name: 'endDate', required: false, description: '종료일 필터 (ISO 형식)', type: String })
   @ApiQuery({ name: 'search', required: false, description: '검색어 (이름, 설명)', type: String })
   @ApiQuery({ name: 'tags', required: false, description: '태그 필터 (쉼표로 구분)', type: String })
-  @ApiResponse({ status: 200, description: '이벤트 목록 조회 성공' })
+  @ApiResponse({ 
+    status: 200, 
+    description: '이벤트 목록 조회 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '이벤트 목록 조회 성공' },
+        data: {
+          type: 'object',
+          properties: {
+            items: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', example: '60d3b41667948b2d347e12b8' },
+                  name: { type: 'string', example: '신규 가입 이벤트' },
+                  description: { type: 'string', example: '신규 가입 사용자를 위한 이벤트' },
+                  status: { type: 'string', example: 'active' },
+                  startDate: { type: 'string', format: 'date-time', example: '2023-05-01T00:00:00Z' },
+                  endDate: { type: 'string', format: 'date-time', example: '2023-06-01T23:59:59Z' },
+                  conditionType: { type: 'string', example: 'login' },
+                  conditionParams: { type: 'object', example: { requiredDays: 5 } },
+                  createdAt: { type: 'string', format: 'date-time', example: '2023-04-15T12:00:00Z' }
+                }
+              }
+            },
+            page: { type: 'integer', example: 1 },
+            limit: { type: 'integer', example: 10 },
+            total: { type: 'integer', example: 25 },
+            totalPages: { type: 'integer', example: 3 }
+          }
+        }
+      }
+    }
+  })
   @Public()
   @Get()
   async getEvents(
@@ -66,7 +102,43 @@ export class EventController {
    * 활성화된 이벤트 목록 조회
    */
   @ApiOperation({ summary: '활성화된 이벤트 목록 조회', description: '현재 활성화된 이벤트 목록을 조회합니다.' })
-  @ApiResponse({ status: 200, description: '활성화된 이벤트 목록 조회 성공' })
+  @ApiResponse({ 
+    status: 200, 
+    description: '활성화된 이벤트 목록 조회 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '활성화된 이벤트 목록 조회 성공' },
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', example: '60d3b41667948b2d347e12b8' },
+              name: { type: 'string', example: '출석 체크 이벤트' },
+              description: { type: 'string', example: '3일 연속 출석시 보상' },
+              status: { type: 'string', example: 'active' },
+              startDate: { type: 'string', format: 'date-time' },
+              endDate: { type: 'string', format: 'date-time' },
+              conditionType: { type: 'string', example: 'login' },
+              rewards: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string', example: '골드 보상' },
+                    type: { type: 'string', example: 'currency' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
   @Public()
   @Get('active')
   async getActiveEvents() {
@@ -84,8 +156,57 @@ export class EventController {
    */
   @ApiOperation({ summary: '이벤트 상세 조회', description: '특정 이벤트의 상세 정보를 조회합니다.' })
   @ApiParam({ name: 'id', description: '이벤트 ID' })
-  @ApiResponse({ status: 200, description: '이벤트 상세 조회 성공' })
-  @ApiResponse({ status: 404, description: '이벤트를 찾을 수 없음' })
+  @ApiResponse({ 
+    status: 200, 
+    description: '이벤트 상세 조회 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '이벤트 상세 조회 성공' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '60d3b41667948b2d347e12b8' },
+            name: { type: 'string', example: '신규 가입 이벤트' },
+            description: { type: 'string', example: '신규 가입 사용자를 위한 이벤트' },
+            status: { type: 'string', example: 'active' },
+            startDate: { type: 'string', format: 'date-time', example: '2023-05-01T00:00:00Z' },
+            endDate: { type: 'string', format: 'date-time', example: '2023-06-01T23:59:59Z' },
+            conditionType: { type: 'string', example: 'login' },
+            conditionParams: { type: 'object', example: { requiredDays: 5 } },
+            createdAt: { type: 'string', format: 'date-time', example: '2023-04-15T12:00:00Z' },
+            createdBy: { type: 'string', example: '60d3b41667948b2d347e12b1' },
+            rewards: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', example: '60d3b41667948b2d347e12c5' },
+                  name: { type: 'string', example: '신규 가입 보상' },
+                  type: { type: 'string', example: 'item' },
+                  amount: { type: 'integer', example: 1 },
+                  description: { type: 'string', example: '신규 가입자 환영 아이템' }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: '이벤트를 찾을 수 없음',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: false },
+        message: { type: 'string', example: '이벤트를 찾을 수 없습니다' },
+        error: { type: 'string', example: 'NotFound' }
+      }
+    }
+  })
   @Public()
   @Get(':id')
   async getEvent(@Param('id') id: string) {
@@ -118,7 +239,36 @@ export class EventController {
       }
     }
   })
-  @ApiResponse({ status: 201, description: '이벤트 생성 성공' })
+  @ApiResponse({ 
+    status: 201, 
+    description: '이벤트 생성 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '이벤트 생성 성공' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '60d3b41667948b2d347e12b8' },
+            name: { type: 'string', example: '신규 가입 이벤트' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: '잘못된 요청 데이터',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: false },
+        message: { type: 'string', example: '유효하지 않은 이벤트 데이터' },
+        error: { type: 'string', example: 'BadRequest' }
+      }
+    }
+  })
   @Roles(UserRole.ADMIN)
   @Post()
   async createEvent(@Body() eventData: any, @Req() req: any) {
@@ -142,7 +292,24 @@ export class EventController {
    */
   @ApiOperation({ summary: '이벤트 수정', description: '기존 이벤트 정보를 수정합니다.' })
   @ApiParam({ name: 'id', description: '이벤트 ID' })
-  @ApiResponse({ status: 200, description: '이벤트 수정 성공' })
+  @ApiResponse({ 
+    status: 200, 
+    description: '이벤트 수정 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '이벤트 수정 성공' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '60d3b41667948b2d347e12b8' },
+            name: { type: 'string', example: '수정된 이벤트 이름' }
+          }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 404, description: '이벤트를 찾을 수 없음' })
   @Roles(UserRole.ADMIN)
   @Put(':id')
@@ -185,7 +352,24 @@ export class EventController {
       }
     }
   })
-  @ApiResponse({ status: 200, description: '이벤트 상태 수정 성공' })
+  @ApiResponse({ 
+    status: 200, 
+    description: '이벤트 상태 수정 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '이벤트 상태 수정 성공' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '60d3b41667948b2d347e12b8' },
+            status: { type: 'string', example: 'active' }
+          }
+        }
+      }
+    }
+  })
   @Roles(UserRole.ADMIN)
   @Put(':id/status')
   async updateEventStatus(
@@ -206,7 +390,18 @@ export class EventController {
    */
   @ApiOperation({ summary: '이벤트 삭제', description: '이벤트를 삭제합니다.' })
   @ApiParam({ name: 'id', description: '이벤트 ID' })
-  @ApiResponse({ status: 200, description: '이벤트 삭제 성공' })
+  @ApiResponse({ 
+    status: 200, 
+    description: '이벤트 삭제 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '이벤트 삭제 성공' },
+        data: { type: 'object', properties: {} }
+      }
+    }
+  })
   @ApiResponse({ status: 404, description: '이벤트를 찾을 수 없음' })
   @Roles(UserRole.ADMIN)
   @Delete(':id')

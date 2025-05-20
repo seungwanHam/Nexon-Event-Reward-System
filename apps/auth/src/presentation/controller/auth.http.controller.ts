@@ -11,7 +11,7 @@ import {
   Request
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiParam } from '@nestjs/swagger';
-import { UserRole } from '../../../../../../libs/common/src/enum';
+import { UserRole } from '@app/libs/common/enum';
 import { JwtAuthGuard, RolesGuard, Public, Roles } from '../../../../../libs/auth/src';
 import * as jwt from 'jsonwebtoken';
 

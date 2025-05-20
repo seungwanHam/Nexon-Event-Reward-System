@@ -53,15 +53,15 @@
 
 이런 문제점을 해결하기 위해, 다음 원칙을 따르는 Clean+Layered 아키텍처를 고안했습니다:
 
-| 항목 | 설명 |
-|------|------|
-| **핵심 도메인 순수성** | 비즈니스 로직은 외부 프레임워크나 DB 의존 없이 순수 TypeScript로 구현 |
-| **계층 간 책임 구분** | Presentation -> Application -> Domain <- Infrastructure로 역할과 책임을 명확히 분리 |
-| **도메인 주도 설계 요소** | Entity, DomainService 등 적극 도입 |
-| **프레임워크 활용과 격리의 균형** | NestJS의 유틸리티(Guard, Decorator 등)는 활용하되 도메인 로직은 격리 |
-| **단방향 의존성 유지** | 외부 → 내부 방향의 의존성만 허용하여 구조적 안정성 확보 |
-| **기술 변화 대응력** | Mongo → 다른 DB로 교체하거나 이벤트 시스템 변경 시에도 도메인은 그대로 유지 가능 |
-| **유지보수 중심** | 변경이 잦은 도메인(이벤트/보상 규칙)을 빠르게 반영할 수 있도록 설계 |
+| 항목                              | 설명                                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------------- |
+| **핵심 도메인 순수성**            | 비즈니스 로직은 외부 프레임워크나 DB 의존 없이 순수 TypeScript로 구현               |
+| **계층 간 책임 구분**             | Presentation -> Application -> Domain <- Infrastructure로 역할과 책임을 명확히 분리 |
+| **도메인 주도 설계 요소**         | Entity, DomainService 등 적극 도입                                                  |
+| **프레임워크 활용과 격리의 균형** | NestJS의 유틸리티(Guard, Decorator 등)는 활용하되 도메인 로직은 격리                |
+| **단방향 의존성 유지**            | 외부 → 내부 방향의 의존성만 허용하여 구조적 안정성 확보                             |
+| **기술 변화 대응력**              | Mongo → 다른 DB로 교체하거나 이벤트 시스템 변경 시에도 도메인은 그대로 유지 가능    |
+| **유지보수 중심**                 | 변경이 잦은 도메인(이벤트/보상 규칙)을 빠르게 반영할 수 있도록 설계                 |
 
 ### 계층 구조와 책임 정의
 
@@ -213,14 +213,24 @@ export class MongoEventRepository implements EventRepository {
 
 #### Rule 기반 보상 처리 설계
 
-- 모든 이벤트 및 보상 흐름은 `Rule` 객체 기반으로 처리됩니다.
-- 각 Rule은 다음 요소로 구성됩니다:
-  - `trigger`: 어떤 이벤트에 반응할지 정의
-  - `condition`: 유저의 행동 조건 (예: 로그인 횟수, 초대 인원)
-  - `action`: 지급할 보상 정보
-  - `approvalRequired`: 자동 지급 또는 운영자 승인 여부
-- Rule은 MongoDB에 저장되며 핫 리로딩 혹은 캐시 적용을 고려한 구조입니다.
-- 조건 평가 방식은 전략 패턴 기반으로, 새로운 이벤트 유형에 쉽게 대응할 수 있습니다.
+- **이벤트 엔티티(EventEntity)**: 
+   - 이벤트 정보, 조건 유형, 활성 상태 등을 정의
+   - 조건 파라미터(conditionParams)를 통해 이벤트별 평가 조건 관리
+
+- **규칙 엔진(RuleEngine)**:
+   - 사용자 행동이 이벤트 조건을 충족하는지 평가
+   - 조건 유형별로 다른 평가 로직 적용(전략 패턴 활용)
+   - 중복 보상 청구 방지 기능 제공
+
+- **보상 처리 흐름**:
+   - 사용자 행동 데이터 수집 및 저장
+   - 규칙 엔진을 통한 조건 충족 여부 평가
+   - 자동 승인 또는 운영자 승인 프로세스 진행
+   - 보상 지급 및 이력 관리
+
+평가 방식은 이벤트 조건 유형(ConditionType)에 따라 구분됩니다:
+- LOGIN: 로그인 횟수 기반 평가
+- CUSTOM: 특정 사용자 행동(회원가입 등) 기반 평가
 
 #### 도메인 간 연동 & 퍼사드 계층
 
@@ -229,18 +239,17 @@ export class MongoEventRepository implements EventRepository {
 예시: `EventFacade`가 보상 흐름 전체를 조율합니다.
 
 ```ts
-class EventFacade {
-  async handleEventReport(eventType, userId) {
-    const rules = await this.ruleRepo.findByTrigger(eventType);
-    for (const rule of rules) {
-      const ok = await this.evaluator.evaluate(rule, userId);
-      if (ok) {
-        rule.approvalRequired
-          ? await this.rewardService.queueForApproval(rule, userId)
-          : await this.rewardService.grantImmediateReward(rule, userId);
-      }
-    }
-  }
+// 실제 구현된 EventFacade 메소드 예시
+async evaluateUserAction(userId: string, eventId: string, userAction: any): Promise<boolean> {
+  // 이벤트 정보 조회
+  const event = await this.eventService.findEventById(eventId);
+  // 규칙 엔진을 통한 조건 평가
+  return this.ruleEngine.evaluateCondition(userId, event, userAction);
+}
+
+async createClaim(userId: string, eventId: string, rewardId: string): Promise<RewardClaimEntity> {
+  // 보상 청구 생성 (ClaimService에 위임)
+  return this.claimService.createClaim(userId, eventId, rewardId);
 }
 ```
 이 방식은:
@@ -283,6 +292,12 @@ docker-compose up -d
 # 컨테이너 확인
 docker ps
 
+# 테스트 스크립트 실행 권한 부여
+chmod +x AUTOMATED_INTEGRATION_TEST.sh
+
+# 테스트 스크립트 실행 (Docker 컨테이너가 실행 중이어야 함) - 결과 파일이 저장 ex-test_20250520_133823
+./AUTOMATED_INTEGRATION_TEST.sh
+
 # 서비스 확인:
 - Gateway API: http://localhost:3000
 - MongoDB: localhost:27017
@@ -308,8 +323,8 @@ docker ps
 6. 감사자 역할 검증
 
 | ![통합 테스트 실행 결과 1](./docs/AUTOMATED_INTEGRATION_TEST_01.png) | ![통합 테스트 실행 결과 2](./docs/AUTOMATED_INTEGRATION_TEST_02.png) |
-|:---:|:---:|
-| 통합 테스트 실행 결과 1 | 통합 테스트 실행 결과 2 |
+| :------------------------------------------------------------------: | :------------------------------------------------------------------: |
+|                       통합 테스트 실행 결과 1                        |                       통합 테스트 실행 결과 2                        |
 
 ## API 문서
 

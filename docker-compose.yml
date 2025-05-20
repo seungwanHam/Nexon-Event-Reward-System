@@ -12,7 +12,7 @@ services:
       - mongodb_data:/data/db
     networks:
       - nexon-network
-    
+
   mongo-express:
     image: mongo-express
     restart: always
@@ -43,8 +43,10 @@ services:
       dockerfile: apps/auth/Dockerfile
     container_name: nexon-auth-service
     restart: always
-    ports:
-      - "3001:3001"
+    # ports:
+    #   - "3001:3001"
+    expose:
+      - "3001"
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
@@ -68,8 +70,10 @@ services:
       dockerfile: apps/event/Dockerfile
     container_name: nexon-event-service
     restart: always
-    ports:
-      - "3002:3002"
+    # ports:
+    # - "3002:3002"
+    expose:
+      - "3002"
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb:27017/nexon-event-system
@@ -107,6 +111,7 @@ services:
 
 volumes:
   mongodb_data:
+
 
 networks:
   nexon-network:

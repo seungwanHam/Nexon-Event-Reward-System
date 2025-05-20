@@ -11,4 +11,10 @@ export enum UserRole {
 }
 
 // 의존성 주입 토큰
-export const HTTP_CLIENT = 'HTTP_CLIENT'; 
+export const HTTP_CLIENT = 'HTTP_CLIENT';
+
+export const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:3000';
+export const EVENT_SERVICE_URL = process.env.EVENT_SERVICE_URL || 'http://localhost:3002';
+
+export const DEFAULT_TIMEOUT = 5000;
+export const DEFAULT_MAX_REDIRECTS = 5; 

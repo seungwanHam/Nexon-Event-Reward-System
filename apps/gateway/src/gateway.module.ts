@@ -9,12 +9,18 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 // Controllers
 import { GatewayController } from './presentation/controller/gateway.controller';
 import { HealthController } from './presentation/controller/health.controller';
+import { EventController } from './presentation/controller/event.controller';
+import { ClaimController } from './presentation/controller/claim.controller';
+import { RewardController } from './presentation/controller/reward.controller';
+import { AuditController } from './presentation/controller/audit.controller';
 
 // Facades
 import { AuthFacade } from './application/facade/auth.facade';
+import { EventFacade } from './application/facade/event.facade';
 
 // Clients
 import { AuthHttpClient } from './infrastructure/client/auth.http.client';
+import { EventHttpClient } from './infrastructure/client/event.http.client';
 
 // Interceptors
 import { HttpErrorInterceptor } from '@app/libs/infrastructure/interceptor';
@@ -42,17 +48,33 @@ import { HttpErrorInterceptor } from '@app/libs/infrastructure/interceptor';
     // Auth 모듈
     AuthModule.register({
       accessTokenSecret: process.env.JWT_ACCESS_SECRET || 'nexon-access-secret',
-      accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
+      accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '1h',
       refreshTokenSecret: process.env.JWT_REFRESH_SECRET || 'nexon-refresh-secret',
       refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
     }),
   ],
-  controllers: [GatewayController, HealthController],
+  controllers: [
+    GatewayController, 
+    HealthController, 
+    EventController,
+    ClaimController,
+    RewardController,
+    AuditController
+  ],
   providers: [
+    // Facade
     AuthFacade,
+    EventFacade,
+    
+    // HTTP Clients
     AuthHttpClient,
+    EventHttpClient,
+    
+    // Auth
     JwtStrategy,
     JwtRefreshStrategy,
+    
+    // Interceptors
     {
       provide: APP_INTERCEPTOR,
       useClass: HttpErrorInterceptor,

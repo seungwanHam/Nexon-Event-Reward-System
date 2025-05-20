@@ -79,6 +79,7 @@ export class GatewayController {
   })
   @Post('auth/register')
   async authRegister(@Body() registerDto: RegisterRequestDto): Promise<AuthResponseDto> {
+    console.log('registerDto', registerDto);
     const result = await this.authFacade.register(registerDto);
     return {
       success: true,

@@ -1,41 +1,19 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Body, 
-  Param, 
-  UseGuards,
-  Request,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  BadRequestException,
-  NotFoundException,
-  InternalServerErrorException
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Request, HttpCode, HttpStatus, Logger, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiParam } from '@nestjs/swagger';
 import { EventFacade } from '../../application/facade';
-import { 
-  CreateEventDto, 
-  UpdateEventDto, 
-  ChangeEventStatusDto, 
-  EventResponseDto 
-} from '../dto';
-import { JwtAuthGuard, RolesGuard, Public } from '@app/libs/auth';
+import { CreateEventDto, UpdateEventDto, ChangeEventStatusDto, EventResponseDto } from '../dto';
+import { Public } from '@app/libs/auth';
 import { Roles } from '@app/libs/auth';
 import { UserRole, ConditionType } from '@app/libs/common/enum';
 
 @ApiTags('이벤트')
 @Controller('events')
-// @UseGuards(JwtAuthGuard, RolesGuard)
 @Public()
 @ApiBearerAuth()
 export class EventController {
   private readonly logger = new Logger(EventController.name);
 
-  constructor(private readonly eventFacade: EventFacade) {}
+  constructor(private readonly eventFacade: EventFacade) { }
 
   @Post()
   @Roles(UserRole.OPERATOR, UserRole.ADMIN)
@@ -44,12 +22,12 @@ export class EventController {
   async createEvent(@Body() createEventDto: CreateEventDto, @Request() req): Promise<EventResponseDto> {
     try {
       const { name, description, conditionType, conditionParams, startDate, endDate, metadata } = createEventDto;
-      
+
       this.logger.log(`이벤트 생성 요청: ${name}, 타입: ${conditionType}`);
-      
+
       // 조건 타입에 맞는 파라미터 검증
       this.validateConditionParams(conditionType, conditionParams);
-      
+
       const event = await this.eventFacade.createEvent(
         name,
         description,
@@ -138,23 +116,23 @@ export class EventController {
   ): Promise<EventResponseDto> {
     try {
       this.logger.log(`이벤트 수정 요청: ${id}`);
-      
+
       // 만약 조건 타입과 파라미터가 제공되었다면 검증
       if (updateEventDto.conditionType && updateEventDto.conditionParams) {
         this.validateConditionParams(updateEventDto.conditionType, updateEventDto.conditionParams);
       }
-      
-      const updateData = { 
+
+      const updateData = {
         ...updateEventDto,
         ...(updateEventDto.startDate && { startDate: new Date(updateEventDto.startDate) }),
         ...(updateEventDto.endDate && { endDate: new Date(updateEventDto.endDate) }),
-        metadata: { 
-          ...updateEventDto.metadata, 
+        metadata: {
+          ...updateEventDto.metadata,
           updatedBy: req.user?.id || 'system',
           lastUpdated: new Date().toISOString()
         }
       };
-      
+
       const event = await this.eventFacade.updateEvent(id, updateData);
       this.logger.log(`이벤트 수정 성공: ${id}`);
       return event;
@@ -179,7 +157,7 @@ export class EventController {
   ): Promise<EventResponseDto> {
     try {
       this.logger.log(`이벤트 상태 변경 요청: ${id}, 새 상태: ${changeStatusDto.status}`);
-      
+
       let event;
       if (changeStatusDto.status === 'active') {
         event = await this.eventFacade.activateEvent(id);
@@ -188,7 +166,7 @@ export class EventController {
       } else {
         throw new BadRequestException('지원하지 않는 상태입니다.');
       }
-      
+
       // 상태 변경 감사 로그 기록
       await this.eventFacade.updateEvent(id, {
         metadata: {
@@ -197,7 +175,7 @@ export class EventController {
           previousStatus: changeStatusDto.status === 'active' ? 'inactive' : 'active'
         }
       });
-      
+
       this.logger.log(`이벤트 상태 변경 성공: ${id}, 상태: ${changeStatusDto.status}`);
       return event;
     } catch (error) {
@@ -239,13 +217,13 @@ export class EventController {
           throw new BadRequestException('로그인 이벤트는 필요 로그인 횟수(requiredCount)가 필요합니다.');
         }
         break;
-        
+
       case ConditionType.CUSTOM:
         if (!conditionParams.eventCode) {
           throw new BadRequestException('커스텀 이벤트는 이벤트 코드(eventCode)가 필요합니다.');
         }
         break;
-      
+
       default:
         throw new BadRequestException(`지원하지 않는 조건 타입입니다: ${conditionType}. 현재는 LOGIN과 회원가입(CUSTOM) 이벤트만 지원합니다.`);
     }

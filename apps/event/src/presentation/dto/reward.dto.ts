@@ -30,7 +30,7 @@ export class CreateRewardDto {
   @IsString()
   description: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: '승인 필요 여부 (기본값: false)',
     example: false
   })
@@ -38,7 +38,7 @@ export class CreateRewardDto {
   @IsBoolean()
   requiresApproval?: boolean;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: '추가 메타데이터 (선택사항)',
     example: { itemCode: 'ITEM_123', expires: '7d' }
   })

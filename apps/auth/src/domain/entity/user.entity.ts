@@ -1,9 +1,5 @@
 import { UserRole, UserStatus } from '../../../../../libs/common/src/enum';
-import { 
-  InvalidStatusTransitionException, 
-  InvalidRoleAssignmentException, 
-  ValidationException 
-} from '../../../../../libs/common/src/exception';
+import { InvalidStatusTransitionException, InvalidRoleAssignmentException, ValidationException } from '../../../../../libs/common/src/exception';
 
 export class UserEntity {
   readonly id: string;

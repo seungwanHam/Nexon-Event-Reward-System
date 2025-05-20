@@ -12,13 +12,13 @@ import { JWT_CONSTANTS } from './constant/jwt.constant';
 export interface AuthModuleOptions {
   /** 액세스 토큰 시크릿 키 */
   accessTokenSecret?: string;
-  
+
   /** 리프레시 토큰 시크릿 키 */
   refreshTokenSecret?: string;
-  
+
   /** 액세스 토큰 만료 시간 (예: '1h', '15m') */
   accessTokenExpiry?: string;
-  
+
   /** 리프레시 토큰 만료 시간 (예: '7d', '30d') */
   refreshTokenExpiry?: string;
 }

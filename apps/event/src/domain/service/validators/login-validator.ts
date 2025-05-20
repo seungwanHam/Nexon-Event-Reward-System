@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { EventValidator, ValidationResult } from '../event-validator.interface';
+import { EventValidator } from '../event-validator.interface';
 import { WinstonLoggerService } from '@app/libs/infrastructure/logger';
-import { UserLoginRepository } from '../../../infrastructure/repository/user-login.repository';
 
 /**
  * 로그인 기반 이벤트 검증기
@@ -25,7 +24,7 @@ export class LoginEventValidator implements EventValidator {
     metadata?: Record<string, any>;
   }> {
     this.logger.debug(`로그인 이벤트 검증: 사용자 ${userId}, 이벤트 ${eventId}`);
-    
+
     // 실제 구현에서는 로그인 이력을 확인해야 합니다.
     // 임시 구현에서는 항상 성공으로 처리합니다.
     return {

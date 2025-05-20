@@ -12,7 +12,7 @@ export interface EventData {
    * 일반적으로 'entity.action' 패턴을 따릅니다. (예: 'user.created', 'order.updated')
    */
   type: string;
-  
+
   /**
    * 이벤트 페이로드 (이벤트와 관련된 데이터)
    * 
@@ -20,7 +20,7 @@ export interface EventData {
    * 예를 들어 'user.created' 이벤트는 생성된 사용자 정보를 포함합니다.
    */
   payload: any;
-  
+
   /**
    * 이벤트 메타데이터
    * 
@@ -34,14 +34,14 @@ export interface EventData {
      * 이벤트를 발생시킨 서비스 또는 컴포넌트 식별자입니다.
      */
     source?: string;
-    
+
     /**
      * 이벤트 발생 시간
      * 
      * 이벤트가 생성된 정확한 시간입니다.
      */
     timestamp?: Date;
-    
+
     /**
      * 상관 ID (요청 추적용)
      * 
@@ -49,7 +49,7 @@ export interface EventData {
      * 하나의 사용자 요청이 여러 서비스에 걸쳐 처리될 때 유용합니다.
      */
     correlationId?: string;
-    
+
     /**
      * 사용자 ID (이벤트 발생 주체)
      * 
@@ -57,7 +57,7 @@ export interface EventData {
      * 감사 및 권한 확인에 유용합니다.
      */
     userId?: string;
-    
+
     /**
      * 추가 메타데이터 필드
      * 
@@ -102,7 +102,7 @@ export interface IEventBus {
    * ```
    */
   publish(event: EventData): Promise<void>;
-  
+
   /**
    * 이벤트 구독
    * 
@@ -122,7 +122,7 @@ export interface IEventBus {
    * ```
    */
   subscribe(eventType: string, handler: EventHandler): Promise<void>;
-  
+
   /**
    * 이벤트 구독 취소
    * 

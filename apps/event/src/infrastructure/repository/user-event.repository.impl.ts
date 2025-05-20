@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-
 import { UserEventEntity } from '../../domain/entity/user-event.entity';
 import { UserEventRepository } from '../../domain/repository/user-event.repository';
 import { UserEvent, UserEventDocument } from '@app/libs/common/schema';

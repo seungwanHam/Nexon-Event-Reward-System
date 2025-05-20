@@ -65,7 +65,7 @@ export class EventService {
     if (!event) {
       throw new EventNotFoundException();
     }
-    
+
     // Date 객체로 형변환 확인
     if (typeof event.startDate === 'string') {
       event.startDate = new Date(event.startDate);
@@ -73,15 +73,15 @@ export class EventService {
     if (typeof event.endDate === 'string') {
       event.endDate = new Date(event.endDate);
     }
-    
+
     // 이벤트 상태 자동 업데이트
     event.autoUpdateStatus();
     if (event.updatedAt > event.createdAt) {
       await this.eventRepository.save(event);
     }
-    
+
     this.logger.debug(`이벤트 조회 결과: ID=${event.id}, 상태=${event.status}, 활성=${event.isActive()}, 유효기간=${event.isWithinPeriod()}`);
-    
+
     return event;
   }
 

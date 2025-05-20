@@ -1,26 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Param,
-  Body,
-  HttpStatus,
-  HttpCode,
-  Query,
-  BadRequestException
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, HttpStatus, Query, BadRequestException } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiParam } from '@nestjs/swagger';
 import { EventFacade } from '../../application/facade';
-import {
-  CreateClaimDto,
-  ApproveClaimDto,
-  RejectClaimDto,
-  UserActionDto,
-  ClaimResponseDto
-} from '../dto';
+import { CreateClaimDto, ApproveClaimDto, RejectClaimDto, UserActionDto, ClaimResponseDto } from '../dto';
 import { Public } from '../../../../../libs/auth/src';
-import { ClaimStatus } from '@app/libs/common/enum';
 
 @ApiTags('보상 청구')
 @Controller('claims')
@@ -111,19 +93,19 @@ export class ClaimController {
 
     try {
       const eligible = await this.eventFacade.evaluateUserAction(userId, eventId, actionData);
-      return { 
+      return {
         eligible,
-        details: eligible ? 
-          { message: '조건을 충족합니다.' } : 
+        details: eligible ?
+          { message: '조건을 충족합니다.' } :
           { message: '조건을 충족하지 않습니다.' }
       };
     } catch (error) {
-      return { 
-        eligible: false, 
-        details: { 
-          message: error.message || '조건 평가 중 오류가 발생했습니다.', 
-          error: error.name 
-        } 
+      return {
+        eligible: false,
+        details: {
+          message: error.message || '조건 평가 중 오류가 발생했습니다.',
+          error: error.name
+        }
       };
     }
   }

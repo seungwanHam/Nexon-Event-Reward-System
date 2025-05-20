@@ -1,16 +1,7 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpException, HttpStatus, Logger, } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { WinstonLoggerService } from '../logger';
-import { AxiosError } from 'axios';
 import { Request, Response } from 'express';
 import { SystemErrorCodes, GatewayErrorCodes, ErrorCode } from '@app/libs/common/exception/error-codes';
 
@@ -20,15 +11,15 @@ import { SystemErrorCodes, GatewayErrorCodes, ErrorCode } from '@app/libs/common
 interface ErrorResponse {
   /** 요청 성공 여부 (항상 false) */
   success: boolean;
-  
+
   /** 사용자 친화적인 에러 메시지 */
   message: string;
-  
+
   /** 에러 상세 정보 */
   error: {
     /** 에러 코드 (식별자) */
     code: string;
-    
+
     /** 추가 에러 상세 정보 (개발 환경에서만 포함) */
     details?: any;
   };
@@ -48,13 +39,13 @@ interface ErrorResponse {
 @Injectable()
 export class HttpErrorInterceptor implements NestInterceptor {
   private readonly logger = new Logger(HttpErrorInterceptor.name);
-  
+
   /**
    * HTTP 에러 인터셉터 생성자
    * 
    * @param loggerService - 로깅 서비스
    */
-  constructor(private readonly loggerService: WinstonLoggerService) { 
+  constructor(private readonly loggerService: WinstonLoggerService) {
     this.loggerService.setContext('HttpErrorInterceptor');
   }
 
@@ -96,7 +87,7 @@ export class HttpErrorInterceptor implements NestInterceptor {
       }),
     );
   }
-  
+
   /**
    * 고유한 요청 ID를 생성합니다.
    * 
@@ -106,7 +97,7 @@ export class HttpErrorInterceptor implements NestInterceptor {
   private generateRequestId(): string {
     return Math.random().toString(36).substring(2, 10);
   }
-  
+
   /**
    * 내부 애플리케이션 에러를 처리합니다.
    * 
@@ -119,21 +110,21 @@ export class HttpErrorInterceptor implements NestInterceptor {
    */
   private handleInternalError(error: any, request: Request, requestId: string, duration: string): Observable<never> {
     const isDev = process.env.NODE_ENV !== 'production';
-    
+
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let errorCode: ErrorCode = SystemErrorCodes.SYSTEM_ERROR;
     let errorMessage = '서버 내부 오류가 발생했습니다';
     let errorDetails = undefined;
-    
+
     if (error instanceof HttpException) {
       statusCode = error.getStatus();
       errorCode = this.getErrorCode(error);
-      
+
       // 에러 응답 형식 확인
       const errorResponse = error.getResponse();
       if (typeof errorResponse === 'object') {
         errorMessage = errorResponse['message'] || errorMessage;
-        
+
         // 개발 환경에서만 상세 정보 포함
         if (isDev) {
           errorDetails = errorResponse['details'] || undefined;
@@ -151,7 +142,7 @@ export class HttpErrorInterceptor implements NestInterceptor {
         };
       }
     }
-    
+
     const errorResponse: ErrorResponse = {
       success: false,
       message: errorMessage,
@@ -160,15 +151,15 @@ export class HttpErrorInterceptor implements NestInterceptor {
         details: errorDetails
       }
     };
-    
+
     this.loggerService.error(
       `[HTTP] [${requestId}] ← ${request.method} ${request.url} - ${statusCode} Error(${errorCode}) - ${duration}`,
       { error: errorResponse.error }
     );
-    
+
     return throwError(() => new HttpException(errorResponse, statusCode));
   }
-  
+
   /**
    * 외부 서비스(마이크로서비스)의 에러 응답을 처리합니다.
    * 
@@ -182,7 +173,7 @@ export class HttpErrorInterceptor implements NestInterceptor {
   private handleExternalServiceError(error: any, request: Request, requestId: string, duration: string): Observable<never> {
     const errorData = error.response.data;
     const errorCode = errorData.error?.code || GatewayErrorCodes.GATEWAY_INVALID_RESPONSE;
-    
+
     const errorResponse: ErrorResponse = {
       success: false,
       message: errorData.message || '서비스 처리 중 오류가 발생했습니다',
@@ -199,7 +190,7 @@ export class HttpErrorInterceptor implements NestInterceptor {
 
     return throwError(() => new HttpException(errorResponse, error.response.status || HttpStatus.BAD_GATEWAY));
   }
-  
+
   /**
    * HttpException에서 에러 코드를 추출합니다.
    * 
@@ -216,7 +207,7 @@ export class HttpErrorInterceptor implements NestInterceptor {
       const errorCode = response['error'];
       return typeof errorCode === 'string' ? errorCode : SystemErrorCodes.SYSTEM_ERROR;
     }
-    
+
     // 기본 HTTP 상태 코드를 기반으로 에러 코드 생성
     const status = error.getStatus();
     switch (status) {

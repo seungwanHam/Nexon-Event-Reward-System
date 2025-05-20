@@ -9,16 +9,16 @@ import { ICacheService } from '../../interface/cache.interface';
 interface RedisConfig {
   /** Redis 서버 호스트 */
   host: string;
-  
+
   /** Redis 서버 포트 */
   port: number;
-  
+
   /** Redis 서버 비밀번호 (선택) */
   password?: string;
-  
+
   /** Redis 연결 제한 시간 (밀리초) */
   connectTimeout?: number;
-  
+
   /** 데이터베이스 인덱스 */
   db?: number;
 }
@@ -48,7 +48,7 @@ export class RedisCacheService implements ICacheService, OnModuleInit, OnModuleD
     private readonly loggerService: WinstonLoggerService,
   ) {
     this.logger = new Logger(RedisCacheService.name);
-    
+
     // Master 설정
     this.master = new Redis({
       host: config.host,
@@ -178,17 +178,17 @@ export class RedisCacheService implements ICacheService, OnModuleInit, OnModuleD
     try {
       let cursor = '0';
       let deletedCount = 0;
-      
+
       do {
         const [nextCursor, keys] = await this.master.scan(cursor, 'MATCH', pattern, 'COUNT', '100');
         cursor = nextCursor;
-        
+
         if (keys.length > 0) {
           await this.master.del(keys);
           deletedCount += keys.length;
         }
       } while (cursor !== '0');
-      
+
       if (deletedCount > 0) {
         this.logger.log(`Redis delPattern 작업 완료: ${deletedCount}개 키 삭제됨 (pattern: ${pattern})`);
       }

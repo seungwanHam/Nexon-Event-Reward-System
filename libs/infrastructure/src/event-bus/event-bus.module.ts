@@ -122,7 +122,7 @@ export class EventBusModule {
     prefix?: string;
   }): DynamicModule {
     const isProduction = process.env.NODE_ENV === 'production';
-    return isProduction 
+    return isProduction
       ? this.registerRedis(options)
       : this.registerInMemory();
   }

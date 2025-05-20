@@ -112,7 +112,7 @@ export class AuthService {
   async refreshTokens(refreshTokenDto: RefreshTokenRequestDto): Promise<TokenResponseDto> {
     const { userId, refreshToken } = refreshTokenDto;
     const lockKey = `refresh:${userId}`;
-    
+
     // 분산 락 획득
     const { success, release } = await this.lockManager.acquireLock(lockKey, {
       retryCount: 3,

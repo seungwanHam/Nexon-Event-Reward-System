@@ -24,13 +24,13 @@ export interface CacheConfigOptions {
 
   /** 최대 캐시 크기 */
   max?: number;
-  
+
   /** Redis 데이터베이스 인덱스 (0-15) */
   db?: number;
-  
+
   /** 연결 제한 시간 (밀리초) */
   timeout?: number;
-  
+
   /** 모듈을 전역으로 등록할지 여부 */
   isGlobal?: boolean;
 } 

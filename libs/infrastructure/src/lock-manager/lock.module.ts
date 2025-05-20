@@ -68,7 +68,7 @@ export class LockModule {
       global: true,
     };
   }
-  
+
   /**
    * 테스트 환경을 위한 락 모듈을 등록합니다.
    * 

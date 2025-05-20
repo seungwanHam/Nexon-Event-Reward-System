@@ -1,30 +1,14 @@
-import { 
-  Body, 
-  Controller, 
-  Get, 
-  HttpCode, 
-  HttpStatus, 
-  Param, 
-  Post, 
-  Put, 
-  UseGuards,
-  Request
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, UseGuards, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiParam } from '@nestjs/swagger';
 import { UserRole } from '@app/libs/common/enum';
 import { JwtAuthGuard, RolesGuard, Public, Roles } from '../../../../../libs/auth/src';
-import * as jwt from 'jsonwebtoken';
 
 // DTO
-import { 
-  AuthResponseDto, 
-  LogoutRequestDto, 
-  TokenResponseDto, 
-  RefreshTokenRequestDto, 
-  RegisterRequestDto, 
-  LoginRequestDto, 
-  UpdateUserRequestDto, 
-  ProfileResponseDto 
+import {
+  AuthResponseDto, LogoutRequestDto,
+  TokenResponseDto, RefreshTokenRequestDto,
+  RegisterRequestDto, LoginRequestDto,
+  UpdateUserRequestDto, ProfileResponseDto
 } from '../dto';
 
 // Facade
@@ -103,7 +87,7 @@ export class AuthHttpController {
   async logout(@Body() logoutDto: LogoutRequestDto, @Request() req): Promise<void> {
     // JWT 페이로드에서 userId 사용
     const userId = req.user?.userId || logoutDto.userId;
-    return this.authFacade.logout({ 
+    return this.authFacade.logout({
       userId,
       accessToken: logoutDto.accessToken || req.headers.authorization?.split(' ')[1]
     });

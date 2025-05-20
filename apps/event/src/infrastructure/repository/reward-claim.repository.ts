@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class RewardClaimRepositoryImpl implements RewardClaimRepository {
   constructor(
     @InjectModel(RewardClaimModel.name) private claimModel: Model<RewardClaimDocument>,
-  ) {}
+  ) { }
 
   async findById(id: string): Promise<RewardClaimEntity | null> {
     const claim = await this.claimModel.findOne({ id }).exec();
@@ -58,7 +58,7 @@ export class RewardClaimRepositoryImpl implements RewardClaimRepository {
         .exec();
       return claims.map(claim => this.mapToEntity(claim));
     }
-    
+
     const query = filter ? this.buildQuery(filter) : {};
     const claims = await this.claimModel.find(query).exec();
     return claims.map(claim => this.mapToEntity(claim));
@@ -76,7 +76,7 @@ export class RewardClaimRepositoryImpl implements RewardClaimRepository {
       claimDoc,
       { upsert: true }
     ).exec();
-    
+
     const updatedClaim = await this.claimModel.findOne({ id: claimDoc.id }).exec();
     return this.mapToEntity(updatedClaim);
   }
@@ -101,13 +101,13 @@ export class RewardClaimRepositoryImpl implements RewardClaimRepository {
 
   private buildQuery(filter: Partial<RewardClaimEntity>): Record<string, any> {
     const query: Record<string, any> = {};
-    
+
     if (filter.id) query.id = filter.id;
     if (filter.userId) query.userId = filter.userId;
     if (filter.eventId) query.eventId = filter.eventId;
     if (filter.rewardId) query.rewardId = filter.rewardId;
     if (filter.status) query.status = filter.status;
-    
+
     return query;
   }
 

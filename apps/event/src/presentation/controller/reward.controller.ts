@@ -1,33 +1,17 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Body, 
-  Param, 
-  UseGuards,
-  HttpCode,
-  HttpStatus
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiParam } from '@nestjs/swagger';
 import { EventFacade } from '../../application/facade';
-import { 
-  CreateRewardDto, 
-  UpdateRewardDto, 
-  RewardResponseDto 
-} from '../dto';
-import { JwtAuthGuard, RolesGuard, Public } from '@app/libs/auth';
+import { CreateRewardDto, UpdateRewardDto, RewardResponseDto } from '../dto';
+import { Public } from '@app/libs/auth';
 import { Roles } from '@app/libs/auth';
 import { UserRole } from '@app/libs/common/enum';
 
 @ApiTags('보상')
 @Controller('rewards')
-// @UseGuards(JwtAuthGuard, RolesGuard)
 @Public()
 @ApiBearerAuth()
 export class RewardController {
-  constructor(private readonly eventFacade: EventFacade) {}
+  constructor(private readonly eventFacade: EventFacade) { }
 
   @Post()
   @Public()
@@ -36,7 +20,7 @@ export class RewardController {
   @ApiResponse({ status: HttpStatus.CREATED, description: '보상이 생성됨', type: RewardResponseDto })
   async createReward(@Body() createRewardDto: CreateRewardDto): Promise<RewardResponseDto> {
     const { eventId, type, amount, description, requiresApproval, metadata } = createRewardDto;
-    
+
     const reward = await this.eventFacade.createReward(
       eventId,
       type,

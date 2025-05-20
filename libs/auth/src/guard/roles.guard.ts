@@ -12,7 +12,7 @@ import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   /**
    * 요청에 대한 역할 기반 접근 제어를 수행합니다.

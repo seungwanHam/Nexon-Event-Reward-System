@@ -29,7 +29,7 @@ export class InMemoryEventBus implements IEventBus {
     }
 
     this.logger.debug(`Publishing event: ${event.type}`);
-    
+
     // 해당 이벤트 타입에 등록된 핸들러가 없으면 종료
     if (!this.handlers.has(event.type)) {
       this.logger.debug(`No handlers registered for event: ${event.type}`);

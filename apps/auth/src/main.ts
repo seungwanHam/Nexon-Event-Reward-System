@@ -2,10 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as path from 'path';
 import { AuthModule } from './auth.module';
 import { WinstonLoggerService } from '@app/libs/infrastructure/logger';
-// import { HttpInterceptor, HttpErrorInterceptor } from '@app/libs/infrastructure/interceptor';
 
 /**
  * Auth 마이크로서비스 부트스트랩 함수
@@ -59,12 +57,6 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
-
-    // 인터셉터 설정
-    // app.useGlobalInterceptors(
-    //   new HttpInterceptor(),
-    //   new HttpErrorInterceptor(logger)
-    // );
 
     // HTTP 서버 시작
     await app.listen(httpPort);

@@ -21,13 +21,13 @@ export class WinstonLoggerService implements Logger {
    */
   constructor(@Optional() @Inject('LOGGER_CONTEXT') context?: string) {
     this.context = context;
-    
+
     // 로그 레벨 설정 (개발 환경에서는 더 자세한 로그)
     const level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
-    
+
     // 로그 파일 경로 설정 (프로덕션 환경에서만 파일 로깅)
     const logDir = process.env.LOG_DIR || 'logs';
-    
+
     // 로거 인스턴스 생성
     this.logger = winston.createLogger({
       level,
@@ -46,15 +46,15 @@ export class WinstonLoggerService implements Logger {
             winston.format.printf(this.formatLogMessage.bind(this))
           ),
         }),
-        
+
         // 프로덕션 환경에서는 파일에도 로깅
         ...(process.env.NODE_ENV === 'production' ? [
-          new winston.transports.File({ 
-            filename: path.join(logDir, 'error.log'), 
-            level: 'error' 
+          new winston.transports.File({
+            filename: path.join(logDir, 'error.log'),
+            level: 'error'
           }),
-          new winston.transports.File({ 
-            filename: path.join(logDir, 'combined.log') 
+          new winston.transports.File({
+            filename: path.join(logDir, 'combined.log')
           })
         ] : [])
       ],
@@ -71,7 +71,7 @@ export class WinstonLoggerService implements Logger {
   private formatLogMessage(info: winston.Logform.TransformableInfo): string {
     const { level, message, timestamp, context, ...metadata } = info;
     const contextStr = context || this.context ? `[${context || this.context}]` : '';
-    
+
     let metadataStr = '';
     if (Object.keys(metadata).length > 0) {
       // 스택 트레이스는 별도로 처리 (가독성 향상)
@@ -79,18 +79,18 @@ export class WinstonLoggerService implements Logger {
         metadataStr = `\n${metadata.stack}`;
         delete metadata.stack;
       }
-      
+
       // 숫자 키로 구성된 객체는 문자열 배열로 간주하고 제외
-      const isCharArray = Object.keys(metadata).every(key => 
+      const isCharArray = Object.keys(metadata).every(key =>
         !isNaN(Number(key)) && typeof metadata[key] === 'string' && metadata[key].length === 1
       );
-      
+
       // 일반 메타데이터만 처리 (문자 배열이 아닌 경우)
       if (Object.keys(metadata).length > 0 && !isCharArray) {
         metadataStr += `\n${JSON.stringify(metadata, null, 2)}`;
       }
     }
-    
+
     return `[${timestamp}] ${level.padEnd(7)}: ${contextStr} ${message} ${metadataStr}`;
   }
 
@@ -123,7 +123,7 @@ export class WinstonLoggerService implements Logger {
    */
   error(message: string, metadata?: Record<string, any> | Error | string): void {
     if (metadata instanceof Error) {
-      this.logger.error(message, { 
+      this.logger.error(message, {
         stack: metadata.stack,
         message: metadata.message,
         name: metadata.name

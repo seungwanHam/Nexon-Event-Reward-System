@@ -20,7 +20,7 @@ export class NestAxiosHttpClient implements HttpClient {
   private readonly logger = new Logger(NestAxiosHttpClient.name);
   private readonly DEFAULT_TIMEOUT = 10000; // 10초
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly httpService: HttpService) { }
 
   /**
    * HTTP 요청을 실행합니다.
@@ -41,7 +41,7 @@ export class NestAxiosHttpClient implements HttpClient {
           })
         )
       );
-      
+
       return {
         data: response.data,
         status: response.status,
@@ -141,13 +141,13 @@ export class NestAxiosHttpClient implements HttpClient {
     const status = isAxiosError ? error.response?.status : HttpStatus.INTERNAL_SERVER_ERROR;
     const method = config.method.toUpperCase();
     const url = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
-    
+
     this.logger.error(
       `HTTP ${method} ${url} 요청 실패: ${error.message}`,
       error.stack,
       NestAxiosHttpClient.name
     );
-    
+
     throw error;
   }
 } 

@@ -12,7 +12,7 @@ export class RewardService {
     private readonly rewardRepository: RewardRepository,
     @Inject(EVENT_REPOSITORY)
     private readonly eventRepository: EventRepository,
-  ) {}
+  ) { }
 
   /**
    * 새 보상을 생성합니다.

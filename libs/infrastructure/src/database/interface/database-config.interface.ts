@@ -69,14 +69,14 @@ export interface DatabaseConfigOptions {
    * 기본값: false
    */
   debug?: boolean;
-  
+
   /**
    * 새 URL 파서 사용 여부
    * 
    * 기본값: true
    */
   useNewUrlParser?: boolean;
-  
+
   /**
    * 통합 토폴로지 사용 여부
    * 
@@ -84,28 +84,28 @@ export interface DatabaseConfigOptions {
    * 기본값: true
    */
   useUnifiedTopology?: boolean;
-  
+
   /**
    * 최대 연결 풀 크기
    * 
    * 기본값: 5
    */
   poolSize?: number;
-  
+
   /**
    * 서버 선택 타임아웃 (ms)
    * 
    * 기본값: 30000 (30초)
    */
   serverSelectionTimeoutMS?: number;
-  
+
   /**
    * 소켓 타임아웃 (ms)
    * 
    * 기본값: 360000 (6분)
    */
   socketTimeoutMS?: number;
-  
+
   /**
    * 유휴 시간 (ms)
    * 

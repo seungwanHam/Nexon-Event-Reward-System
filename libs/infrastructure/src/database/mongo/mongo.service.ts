@@ -12,7 +12,7 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     @InjectConnection() private readonly connection: Connection,
-  ) {}
+  ) { }
 
   /**
    * 모듈 초기화 시 데이터베이스 연결 상태 확인
@@ -22,12 +22,12 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
       // 연결 상태 확인
       if (this.connection.readyState === 1) {
         this.logger.log('MongoDB connection is ready');
-        
+
         // DB 서버 정보 확인
         const admin = this.connection.db.admin();
         const serverInfo = await admin.serverInfo();
         this.logger.log(`Connected to MongoDB Server: ${serverInfo.version}`);
-        
+
         // 컬렉션 정보 확인
         const collections = await this.connection.db.listCollections().toArray();
         this.logger.log(`Available collections: ${collections.map(c => c.name).join(', ')}`);
@@ -62,11 +62,11 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
       // 간단한 핑 명령으로 연결 상태 확인
       const adminDb = this.connection.db.admin();
       const result = await adminDb.ping();
-      
+
       if (result && result.ok === 1) {
         // 서버 정보 조회
         const serverInfo = await adminDb.serverInfo();
-        
+
         return {
           status: 'up',
           details: {
@@ -75,7 +75,7 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
           }
         };
       }
-      
+
       return { status: 'down', details: result };
     } catch (error) {
       return {

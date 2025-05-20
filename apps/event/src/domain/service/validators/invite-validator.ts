@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventValidator, ValidationResult } from '../event-validator.interface';
+import { EventValidator } from '../event-validator.interface';
 import { WinstonLoggerService } from '@app/libs/infrastructure/logger';
 
 /**

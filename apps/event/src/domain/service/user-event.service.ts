@@ -15,7 +15,7 @@ export class UserEventService {
   constructor(
     @Inject(USER_EVENT_REPOSITORY)
     private readonly userEventRepository: UserEventRepository,
-  ) {}
+  ) { }
 
   /**
    * 사용자 이벤트 기록
@@ -57,7 +57,7 @@ export class UserEventService {
       // 리포지토리에 저장
       const savedEvent = await this.userEventRepository.save(newEvent);
       this.logger.debug(`사용자 이벤트 기록 완료: ${data.eventType} for ${data.userId}`);
-      
+
       return savedEvent;
     } catch (error) {
       // 멱등성 키 중복으로 인한 오류 처리

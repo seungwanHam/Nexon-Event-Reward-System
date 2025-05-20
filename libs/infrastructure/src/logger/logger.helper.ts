@@ -29,7 +29,7 @@ export function createLogger(context: string): Logger {
     // 로거 팩토리가 설정되지 않은 경우, 기본 콘솔 로거 사용
     return createConsoleLogger(context);
   }
-  
+
   return tempLoggerFactory.createLogger(context);
 }
 
@@ -42,11 +42,11 @@ export function createLogger(context: string): Logger {
  */
 function createConsoleLogger(context: string): Logger {
   const timestamp = () => new Date().toISOString();
-  
+
   return {
-    log: (message: string, metadata?: Record<string, any>) => 
+    log: (message: string, metadata?: Record<string, any>) =>
       console.log(`[${timestamp()}] [INFO] [${context}] ${message}`, metadata || ''),
-    
+
     error: (message: string, metadata?: Record<string, any> | Error | string) => {
       if (metadata instanceof Error) {
         console.error(`[${timestamp()}] [ERROR] [${context}] ${message}`, {
@@ -58,16 +58,16 @@ function createConsoleLogger(context: string): Logger {
         console.error(`[${timestamp()}] [ERROR] [${context}] ${message}`, metadata || '');
       }
     },
-    
-    warn: (message: string, metadata?: Record<string, any>) => 
+
+    warn: (message: string, metadata?: Record<string, any>) =>
       console.warn(`[${timestamp()}] [WARN] [${context}] ${message}`, metadata || ''),
-    
-    debug: (message: string, metadata?: Record<string, any>) => 
+
+    debug: (message: string, metadata?: Record<string, any>) =>
       console.debug(`[${timestamp()}] [DEBUG] [${context}] ${message}`, metadata || ''),
-    
-    verbose: (message: string, metadata?: Record<string, any>) => 
+
+    verbose: (message: string, metadata?: Record<string, any>) =>
       console.log(`[${timestamp()}] [VERBOSE] [${context}] ${message}`, metadata || ''),
-      
+
     setContext: (newContext: string) => createConsoleLogger(newContext)
   };
 }

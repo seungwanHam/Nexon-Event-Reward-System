@@ -3,7 +3,7 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ConfigService {
-  constructor(private readonly configService: NestConfigService) {}
+  constructor(private readonly configService: NestConfigService) { }
 
   get<T = string>(key: string, defaultValue?: T): T {
     return this.configService.get<T>(key, defaultValue);

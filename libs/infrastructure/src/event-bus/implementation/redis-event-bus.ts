@@ -17,18 +17,18 @@ export class RedisEventBus implements IEventBus, OnModuleInit, OnModuleDestroy {
 
   constructor(private readonly configService: ConfigService) {
     const redisUrl = this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
-    
+
     // 구독자 클라이언트
     this.subscriber = createClient({ url: redisUrl });
-    
+
     // 발행자 클라이언트 (구독자와 분리하여 사용)
     this.publisher = createClient({ url: redisUrl });
-    
+
     // 에러 핸들링
     this.subscriber.on('error', (err) => {
       this.logger.error(`Redis subscriber error: ${err.message}`, err.stack);
     });
-    
+
     this.publisher.on('error', (err) => {
       this.logger.error(`Redis publisher error: ${err.message}`, err.stack);
     });
@@ -38,19 +38,19 @@ export class RedisEventBus implements IEventBus, OnModuleInit, OnModuleDestroy {
     // Redis 연결
     await this.subscriber.connect();
     await this.publisher.connect();
-    
+
     // 메시지 수신 핸들러 설정
     this.subscriber.on('message', (channel, message) => {
       try {
         const eventType = channel.replace(this.channelPrefix, '');
         const event = JSON.parse(message) as EventData;
-        
+
         this.processEvent(eventType, event);
       } catch (error) {
         this.logger.error(`Error processing Redis message: ${error.message}`, error.stack);
       }
     });
-    
+
     this.logger.log('Redis event bus initialized');
   }
 
@@ -80,11 +80,11 @@ export class RedisEventBus implements IEventBus, OnModuleInit, OnModuleDestroy {
     }
 
     this.logger.debug(`Publishing event to Redis: ${event.type}`);
-    
+
     // 이벤트를 Redis 채널로 발행
     const channel = `${this.channelPrefix}${event.type}`;
     await this.publisher.publish(channel, JSON.stringify(event));
-    
+
     // 로컬 핸들러도 실행 (같은 서비스 내 구독자 처리)
     await this.processEvent(event.type, event);
   }
@@ -95,7 +95,7 @@ export class RedisEventBus implements IEventBus, OnModuleInit, OnModuleDestroy {
   async subscribe(eventType: string, handler: EventHandler): Promise<void> {
     if (!this.handlers.has(eventType)) {
       this.handlers.set(eventType, new Set());
-      
+
       // Redis 채널 구독
       const channel = `${this.channelPrefix}${eventType}`;
       await this.subscriber.subscribe(channel);
@@ -119,7 +119,7 @@ export class RedisEventBus implements IEventBus, OnModuleInit, OnModuleDestroy {
     if (handler) {
       this.handlers.get(eventType)!.delete(handler);
       this.logger.debug(`Handler unsubscribed from event: ${eventType}`);
-      
+
       // 핸들러가 더 이상 없으면 Redis 구독도 취소
       if (this.handlers.get(eventType)!.size === 0) {
         const channel = `${this.channelPrefix}${eventType}`;
@@ -127,7 +127,7 @@ export class RedisEventBus implements IEventBus, OnModuleInit, OnModuleDestroy {
         this.handlers.delete(eventType);
         this.logger.debug(`Unsubscribed from Redis channel: ${channel}`);
       }
-      
+
       return;
     }
 
@@ -137,7 +137,7 @@ export class RedisEventBus implements IEventBus, OnModuleInit, OnModuleDestroy {
     this.handlers.delete(eventType);
     this.logger.debug(`All handlers unsubscribed from event: ${eventType}`);
   }
-  
+
   /**
    * 이벤트 처리 로직
    */

@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class RewardRepositoryImpl implements RewardRepository {
   constructor(
     @InjectModel(RewardModel.name) private rewardModel: Model<RewardDocument>,
-  ) {}
+  ) { }
 
   async findById(id: string): Promise<RewardEntity | null> {
     const reward = await this.rewardModel.findOne({ id }).exec();
@@ -30,7 +30,7 @@ export class RewardRepositoryImpl implements RewardRepository {
 
   async save(reward: RewardEntity): Promise<void> {
     const rewardDoc = this.mapToDocument(reward);
-    
+
     if (!rewardDoc.id) {
       rewardDoc.id = uuidv4();
     }
@@ -48,11 +48,11 @@ export class RewardRepositoryImpl implements RewardRepository {
 
   private buildQuery(filter: Partial<RewardEntity>): Record<string, any> {
     const query: Record<string, any> = {};
-    
+
     if (filter.id) query.id = filter.id;
     if (filter.eventId) query.eventId = filter.eventId;
     if (filter.type) query.type = filter.type;
-    
+
     return query;
   }
 

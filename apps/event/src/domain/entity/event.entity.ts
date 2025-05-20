@@ -81,14 +81,14 @@ export class EventEntity {
           throw new ValidationException('로그인 이벤트는 필요 로그인 횟수(requiredCount)가 필요합니다.');
         }
         break;
-        
+
       case ConditionType.CUSTOM:
         // 커스텀 이벤트는 이벤트 코드(eventCode)가 필요
         if (!this.conditionParams.eventCode) {
           throw new ValidationException('커스텀 이벤트는 이벤트 코드(eventCode)가 필요합니다.');
         }
         break;
-        
+
       default:
         throw new ValidationException(`지원하지 않는 조건 타입입니다: ${this.conditionType}. 현재는 LOGIN과 회원가입(CUSTOM) 이벤트만 지원합니다.`);
     }
@@ -120,7 +120,7 @@ export class EventEntity {
     if (props.endDate) this.endDate = props.endDate;
     if (props.metadata) this.metadata = { ...this.metadata, ...props.metadata };
     this.updatedAt = new Date();
-    
+
     // 업데이트 후 유효성 검증
     this.validate();
   }
@@ -140,13 +140,13 @@ export class EventEntity {
     // 날짜가 string으로 저장된 경우 Date 객체로 변환
     const startDate = this.startDate instanceof Date ? this.startDate : new Date(this.startDate);
     const endDate = this.endDate instanceof Date ? this.endDate : new Date(this.endDate);
-    
+
     console.log(`[DEBUG] 이벤트 ${this.id} 기간 확인: 
       현재: ${date.toISOString()}, 
       시작일: ${startDate.toISOString()}, 
       종료일: ${endDate.toISOString()}, 
       유효기간: ${date >= startDate && date <= endDate}`);
-    
+
     return date >= startDate && date <= endDate;
   }
 
@@ -156,9 +156,9 @@ export class EventEntity {
   isValid(date: Date = new Date()): boolean {
     const isActiveStatus = this.isActive();
     const isWithinPeriodStatus = this.isWithinPeriod(date);
-    
+
     console.log(`[DEBUG] 이벤트 ${this.id} 유효성 검사: 활성상태=${isActiveStatus}, 유효기간=${isWithinPeriodStatus}`);
-    
+
     return isActiveStatus && isWithinPeriodStatus;
   }
 

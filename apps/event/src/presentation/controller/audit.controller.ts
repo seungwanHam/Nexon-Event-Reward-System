@@ -2,8 +2,7 @@ import { Controller, Get, Query, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { ClaimService } from '../../domain/service/claim.service';
 import { WinstonLoggerService } from '@app/libs/infrastructure/logger';
-import { JwtAuthGuard, RolesGuard, Roles, Public } from '../../../../../libs/auth/src';
-import { UserRole } from '@app/libs/common/enum';
+import { Public } from '../../../../../libs/auth/src';
 
 /**
  * 감사자(AUDITOR)를 위한 API
@@ -47,33 +46,33 @@ export class AuditController {
     @Query('endDate') endDate?: string,
   ) {
     this.logger.debug(`감사자 보상 요청 내역 조회: 페이지 ${page}, 크기 ${limit}`);
-    
+
     // 필터 구성
     const filter: any = {};
-    
+
     if (status) {
       filter.status = status;
     }
-    
+
     if (eventId) {
       filter.eventId = eventId;
     }
-    
+
     // 날짜 필터 처리
     if (startDate || endDate) {
       filter.claimedAt = {};
-      
+
       if (startDate) {
         filter.claimedAt.$gte = new Date(startDate);
       }
-      
+
       if (endDate) {
         filter.claimedAt.$lte = new Date(endDate);
       }
     }
-    
+
     const claims = await this.claimService.findAll(+page, +limit, filter);
-    
+
     return {
       success: true,
       message: '보상 요청 내역 조회 성공',
@@ -97,9 +96,9 @@ export class AuditController {
   @Get('claims/:id')
   async findClaimById(@Param('id') id: string) {
     this.logger.debug(`감사자 보상 요청 상세 조회: ${id}`);
-    
+
     const claim = await this.claimService.findClaimById(id);
-    
+
     return {
       success: true,
       message: '보상 요청 상세 조회 성공',
@@ -119,9 +118,9 @@ export class AuditController {
   @Get('users/:userId/claims')
   async findClaimsByUser(@Param('userId') userId: string) {
     this.logger.debug(`감사자 사용자별 보상 요청 내역 조회: ${userId}`);
-    
+
     const claims = await this.claimService.findByUser(userId);
-    
+
     return {
       success: true,
       message: '사용자별 보상 요청 내역 조회 성공',
@@ -141,10 +140,10 @@ export class AuditController {
   @Get('events/:eventId/claims')
   async findClaimsByEvent(@Param('eventId') eventId: string) {
     this.logger.debug(`감사자 이벤트별 보상 요청 내역 조회: ${eventId}`);
-    
+
     const filter = { eventId };
     const claims = await this.claimService.findAll(1, 100, filter);
-    
+
     return {
       success: true,
       message: '이벤트별 보상 요청 내역 조회 성공',

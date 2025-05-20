@@ -12,7 +12,7 @@ export class EventFacade {
     private readonly claimService: ClaimService,
     @Inject(RULE_ENGINE)
     private readonly ruleEngine: RuleEngine,
-  ) {}
+  ) { }
 
   // 이벤트 관련 메서드
   async createEvent(

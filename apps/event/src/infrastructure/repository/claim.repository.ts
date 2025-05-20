@@ -11,7 +11,7 @@ import { RewardClaimEntity } from '../../domain/entity/reward-claim.entity';
 export class ClaimRepository {
   constructor(
     @InjectModel(RewardClaimModel.name) private claimModel: Model<RewardClaimDocument>,
-  ) {}
+  ) { }
 
   /**
    * ID로 보상 청구를 조회합니다.
@@ -47,14 +47,14 @@ export class ClaimRepository {
   async updateStatus(id: string, updateData: any): Promise<RewardClaimEntity> {
     await this.claimModel.updateOne(
       { id },
-      { 
-        $set: { 
-          ...updateData, 
-          updatedAt: new Date() 
-        } 
+      {
+        $set: {
+          ...updateData,
+          updatedAt: new Date()
+        }
       }
     ).exec();
-    
+
     const updated = await this.claimModel.findOne({ id }).exec();
     return this.mapToEntity(updated);
   }
@@ -68,7 +68,7 @@ export class ClaimRepository {
       .skip(skip)
       .limit(limit)
       .exec();
-    
+
     return claims.map(claim => this.mapToEntity(claim));
   }
 

@@ -13,7 +13,7 @@ import { LockOptions } from './interface';
 @Injectable()
 export abstract class LockService {
   protected readonly logger = new Logger(LockService.name);
-  
+
   /**
    * 지정된 키에 대한 락을 획득합니다.
    * 
@@ -56,23 +56,23 @@ export abstract class LockService {
   ): Promise<{ success: boolean; release: () => Promise<void> }> {
     this.logger.debug(`Acquiring lock for key: ${key}`);
     const success = await this.acquire(key, options || {});
-    
+
     if (success) {
       this.logger.debug(`Successfully acquired lock for key: ${key}`);
     } else {
       this.logger.debug(`Failed to acquire lock for key: ${key}`);
     }
-    
+
     const release = async (): Promise<void> => {
       this.logger.debug(`Releasing lock for key: ${key}`);
       await this.release(key);
     };
-    
+
     const noopRelease = async (): Promise<void> => {
       this.logger.debug(`No lock to release for key: ${key}`);
       // 아무 작업 없음
     };
-    
+
     return {
       success,
       release: success ? release : noopRelease
@@ -105,12 +105,12 @@ export abstract class LockService {
     options?: LockOptions,
   ): Promise<T | null> {
     const { success, release } = await this.acquireLock(key, options);
-    
+
     if (!success) {
       this.logger.warn(`Could not acquire lock for key: ${key}, skipping operation`);
       return null;
     }
-    
+
     try {
       this.logger.debug(`Executing function with lock for key: ${key}`);
       return await fn();
@@ -147,7 +147,7 @@ export abstract class LockService {
   async executeWithLock<T>(key: string, callback: () => Promise<T>, ttl?: number): Promise<T> {
     this.logger.debug(`Trying to acquire lock for key: ${key} with TTL: ${ttl || 'default'}`);
     const acquired = await this.acquire(key, { lockTTL: ttl });
-    
+
     if (!acquired) {
       const errorMsg = `Failed to acquire lock for key: ${key}`;
       this.logger.error(errorMsg);
@@ -165,7 +165,7 @@ export abstract class LockService {
       await this.release(key);
     }
   }
-  
+
   /**
    * @deprecated Use executeWithLock instead
    */

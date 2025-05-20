@@ -8,37 +8,37 @@ import { v4 as uuidv4 } from 'uuid';
   collection: 'users',
 })
 export class User extends Document {
-  @Prop({ 
-    required: true, 
-    unique: true, 
-    lowercase: true, 
-    trim: true 
+  @Prop({
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
   })
   email: string;
 
   @Prop({ required: true })
   passwordHash: string;
 
-  @Prop({ 
-    required: true, 
-    unique: true, 
-    trim: true 
+  @Prop({
+    required: true,
+    unique: true,
+    trim: true
   })
   nickname: string;
 
   @Prop({ type: [String], enum: UserRole, default: [UserRole.USER] })
   roles: UserRole[];
 
-  @Prop({ 
-    type: String, 
-    enum: UserStatus, 
+  @Prop({
+    type: String,
+    enum: UserStatus,
     default: UserStatus.ACTIVE
   })
   status: UserStatus;
 
-  @Prop({ 
-    type: String, 
-    sparse: true, 
+  @Prop({
+    type: String,
+    sparse: true,
     unique: true
   })
   inviteCode?: string;
@@ -76,12 +76,12 @@ UserSchema.index({ inviteCode: 1 }, { unique: true, sparse: true });
 UserSchema.index({ email: 'text', nickname: 'text' }); // 텍스트 검색 인덱스
 
 // 가상 필드 설정
-UserSchema.virtual('isActive').get(function(this: UserDocument) {
+UserSchema.virtual('isActive').get(function (this: UserDocument) {
   return this.status === UserStatus.ACTIVE;
 });
 
-UserSchema.virtual('fullName').get(function(this: UserDocument) {
-  return this.metadata?.firstName && this.metadata?.lastName 
-    ? `${this.metadata.firstName} ${this.metadata.lastName}` 
+UserSchema.virtual('fullName').get(function (this: UserDocument) {
+  return this.metadata?.firstName && this.metadata?.lastName
+    ? `${this.metadata.firstName} ${this.metadata.lastName}`
     : this.nickname;
 }); 

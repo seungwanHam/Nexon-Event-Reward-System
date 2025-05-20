@@ -21,10 +21,6 @@ export class UserProfileResponseDto {
   })
   id: string;
 
-  @ApiProperty({
-    example: 'John Doe',
-    description: '사용자 닉네임',
-  })
   nickname: string;
 
   @ApiProperty({

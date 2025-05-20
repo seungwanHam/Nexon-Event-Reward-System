@@ -1,5 +1,4 @@
-import { IsNotEmpty, IsString, IsEnum, IsDateString, IsOptional, ValidateNested, IsObject } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsNotEmpty, IsString, IsEnum, IsDateString, IsOptional, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ConditionType, EventStatus } from '@app/libs/common/enum';
 

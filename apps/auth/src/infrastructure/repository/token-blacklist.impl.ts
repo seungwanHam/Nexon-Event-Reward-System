@@ -11,7 +11,7 @@ export class TokenBlacklistRepositoryImpl implements TokenBlacklistRepository {
   constructor(
     @Inject(CACHE_SERVICE)
     private readonly cacheService: ICacheService,
-  ) {}
+  ) { }
 
   async addToBlacklist(token: string, expiryInSeconds: number): Promise<void> {
     const key = this.getTokenKey(token);

@@ -56,7 +56,7 @@ export class ClaimService {
     rewardId: string,
   ): Promise<RewardClaimEntity> {
     this.logger.debug(`보상 청구 요청: 사용자 ${userId}, 이벤트 ${eventId}, 보상 ${rewardId}`);
-    
+
     // 이벤트 유효성 확인
     const event = await this.eventRepository.findById(eventId);
     if (!event) {
@@ -75,7 +75,7 @@ export class ClaimService {
     }
 
     this.logger.debug(`이벤트 ${eventId} 상태: ${event.status}, 시작일: ${event.startDate}, 종료일: ${event.endDate}`);
-    
+
     if (!event.isValid()) {
       this.logger.warn(`비활성 또는 기간 외 이벤트: ${eventId}, 상태 ${event.status}`);
       throw new BadRequestException('활성 상태 및 유효 기간의 이벤트만 청구할 수 있습니다.');
@@ -241,35 +241,35 @@ export class ClaimService {
    */
   async create(createClaimDto: CreateClaimDto) {
     const { userId, rewardId } = createClaimDto;
-    
+
     this.logger.debug(`보상 청구 요청: 사용자 ${userId}, 보상 ${rewardId}`);
-    
+
     // 보상 정보 조회
     const reward = await this.rewardService.findById(rewardId);
-    
+
     if (!reward) {
       this.logger.warn(`존재하지 않는 보상: ${rewardId}`);
       throw new NotFoundException(`보상 ID ${rewardId}를 찾을 수 없습니다`);
     }
-    
+
     const eventId = reward.eventId;
-    
+
     // 중복 보상 확인
     const existingClaim = await this.claimRepository.findByUserAndEvent(userId, eventId);
-    
+
     if (existingClaim) {
       this.logger.warn(`중복 보상 시도: 사용자 ${userId}, 이벤트 ${eventId}`);
       throw new DuplicateClaimException();
     }
-    
+
     // 이벤트 조건 검증
     const validationResult = await this.eventValidatorService.validateEvent(userId, eventId);
-    
+
     if (!validationResult.isValid) {
       this.logger.warn(`이벤트 조건 불충족: 사용자 ${userId}, 이벤트 ${eventId}, 사유: ${validationResult.errorMessage}`);
       throw new EventConditionNotMetException(validationResult.errorMessage);
     }
-    
+
     // 보상 청구 생성
     const claim = await this.claimRepository.create({
       userId,
@@ -279,9 +279,9 @@ export class ClaimService {
       claimedAt: new Date(),
       validationMetadata: validationResult.metadata
     });
-    
+
     this.logger.info(`보상 청구 성공: ${claim.id}`);
-    
+
     return claim;
   }
 
@@ -331,16 +331,16 @@ export class ClaimService {
    */
   async updateStatus(id: string, status: string, processedBy?: string) {
     this.logger.debug(`청구 상태 업데이트: ${id}, 새 상태: ${status}, 처리자: ${processedBy || 'system'}`);
-    
-    const updateData: any = { 
+
+    const updateData: any = {
       status,
       processedAt: new Date()
     };
-    
+
     if (processedBy) {
       updateData.processedBy = processedBy;
     }
-    
+
     return this.claimRepository.updateStatus(id, updateData);
   }
 } 

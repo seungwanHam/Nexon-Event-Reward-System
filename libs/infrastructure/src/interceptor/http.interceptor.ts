@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class HttpInterceptor implements NestInterceptor {
   private readonly logger = new Logger(HttpInterceptor.name);
-  
+
   /**
    * HTTP 인터셉터 생성자
    * 
@@ -41,7 +41,7 @@ export class HttpInterceptor implements NestInterceptor {
     const request = ctx.getRequest<Request>();
     // UUID 기반 요청 ID 생성 (보다 안전한 고유 식별자)
     const requestId = request.headers['x-request-id'] as string || this.generateRequestId();
-    
+
     // 요청 헤더에 요청 ID 추가 (추적 목적)
     request.headers['x-request-id'] = requestId;
 
@@ -55,7 +55,7 @@ export class HttpInterceptor implements NestInterceptor {
           const response = ctx.getResponse<Response>();
           // 응답 헤더에 요청 ID 추가 (클라이언트 추적 가능)
           response.setHeader('X-Request-ID', requestId);
-          
+
           // 성공 응답 로깅
           this.logSuccessResponse(request, response, requestId, now, data);
         },
@@ -66,7 +66,7 @@ export class HttpInterceptor implements NestInterceptor {
       }),
     );
   }
-  
+
   /**
    * 고유한 요청 ID를 생성합니다.
    * 
@@ -81,7 +81,7 @@ export class HttpInterceptor implements NestInterceptor {
       return Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
     }
   }
-  
+
   /**
    * HTTP 요청 정보를 로깅합니다.
    * 
@@ -92,7 +92,7 @@ export class HttpInterceptor implements NestInterceptor {
   private logRequest(request: Request, requestId: string): void {
     const { method, url, ip, headers } = request;
     const userAgent = headers['user-agent'] || 'unknown';
-    
+
     this.loggerService.log(
       `[HTTP] [${requestId}] → ${method} ${url} - ${ip} - ${userAgent}`,
       {
@@ -106,7 +106,7 @@ export class HttpInterceptor implements NestInterceptor {
       }
     );
   }
-  
+
   /**
    * HTTP 성공 응답을 로깅합니다.
    * 
@@ -118,16 +118,16 @@ export class HttpInterceptor implements NestInterceptor {
    * @private
    */
   private logSuccessResponse(
-    request: Request, 
-    response: Response, 
-    requestId: string, 
+    request: Request,
+    response: Response,
+    requestId: string,
     startTime: number,
     responseData?: any
   ): void {
     const { method, url } = request;
     const duration = Date.now() - startTime;
     const statusCode = response.statusCode;
-    
+
     this.loggerService.log(
       `[HTTP] [${requestId}] ← ${method} ${url} - ${statusCode} - ${duration}ms`,
       {
@@ -137,13 +137,13 @@ export class HttpInterceptor implements NestInterceptor {
         statusCode,
         duration: `${duration}ms`,
         // 프로덕션 환경에서는 응답 데이터 로깅을 제한할 수 있음
-        ...(process.env.NODE_ENV !== 'production' && responseData ? { 
-          responseSize: this.getApproximateSize(responseData) 
+        ...(process.env.NODE_ENV !== 'production' && responseData ? {
+          responseSize: this.getApproximateSize(responseData)
         } : {})
       }
     );
   }
-  
+
   /**
    * HTTP 에러 응답을 로깅합니다.
    * 
@@ -158,7 +158,7 @@ export class HttpInterceptor implements NestInterceptor {
     const duration = Date.now() - startTime;
     const statusCode = error.status || error.statusCode || 500;
     const errorResponse = error.response;
-    
+
     // 에러 정보 구성
     const logInfo = {
       requestId,
@@ -179,7 +179,7 @@ export class HttpInterceptor implements NestInterceptor {
       { error: logInfo.error }
     );
   }
-  
+
   /**
    * 헤더에서 민감한 정보를 제거합니다.
    * 
@@ -189,7 +189,7 @@ export class HttpInterceptor implements NestInterceptor {
    */
   private sanitizeHeaders(headers: Record<string, any>): Record<string, any> {
     const sanitized = { ...headers };
-    
+
     // 민감한 헤더 제거 또는 마스킹
     const sensitiveHeaders = ['authorization', 'cookie', 'set-cookie', 'x-api-key'];
     for (const header of sensitiveHeaders) {
@@ -197,10 +197,10 @@ export class HttpInterceptor implements NestInterceptor {
         sanitized[header] = '[REDACTED]';
       }
     }
-    
+
     return sanitized;
   }
-  
+
   /**
    * 객체의 대략적인 크기를 계산합니다.
    * 

@@ -45,7 +45,7 @@ export class AuthFacade {
     // 이벤트 서비스 URL 설정
     const eventServiceUrl = this.configService.get<string>('EVENT_SERVICE_URL');
     this.eventServiceUrl = eventServiceUrl || 'http://localhost:3002';
-    
+
     this.logger.debug(`이벤트 서비스 URL 설정: ${this.eventServiceUrl}`);
   }
 
@@ -60,10 +60,10 @@ export class AuthFacade {
    */
   async register(registerDto: RegisterRequestDto): Promise<AuthResponseDto> {
     this.logger.debug(`회원가입 요청 처리: ${registerDto.email}`);
-    
+
     // 사용자 등록 수행
     const authResponse = await this.authService.register(registerDto);
-    
+
     // 회원가입 이벤트 기록
     await this.recordUserEvent({
       userId: authResponse.id,
@@ -73,7 +73,7 @@ export class AuthFacade {
         nickname: registerDto.nickname,
       }
     });
-    
+
     return authResponse;
   }
 
@@ -88,10 +88,10 @@ export class AuthFacade {
    */
   async login(loginDto: LoginRequestDto): Promise<AuthResponseDto> {
     this.logger.debug(`로그인 요청 처리: ${loginDto.email}`);
-    
+
     // 로그인 수행
     const authResponse = await this.authService.login(loginDto);
-    
+
     // 로그인 이벤트 기록
     await this.recordUserEvent({
       userId: authResponse.id,
@@ -101,7 +101,7 @@ export class AuthFacade {
         deviceInfo: loginDto.deviceInfo || 'unknown',
       }
     });
-    
+
     return authResponse;
   }
 
@@ -128,10 +128,10 @@ export class AuthFacade {
    */
   async logout(dto: LogoutRequestDto): Promise<void> {
     this.logger.debug(`로그아웃 요청 처리: ${dto.userId}`);
-    
+
     // 로그아웃 수행
     await this.authService.logout({ ...dto });
-    
+
     // 로그아웃 이벤트 기록
     await this.recordUserEvent({
       userId: dto.userId,
@@ -165,10 +165,10 @@ export class AuthFacade {
    */
   async updateUser(userId: string, updateUserDto: UpdateUserRequestDto): Promise<AuthResponseDto> {
     this.logger.debug(`사용자 정보 업데이트 요청 처리: ${userId}`);
-    
+
     // 사용자 정보 업데이트 수행
     const authResponse = await this.authService.updateUser(userId, updateUserDto);
-    
+
     // 프로필 업데이트 이벤트 기록
     await this.recordUserEvent({
       userId: userId,
@@ -177,7 +177,7 @@ export class AuthFacade {
         updatedFields: Object.keys(updateUserDto)
       }
     });
-    
+
     return authResponse;
   }
 
@@ -235,7 +235,7 @@ export class AuthFacade {
     try {
       // 이벤트 타입을 스키마에 정의된 유효한 타입으로 매핑
       const mappedEventType = this.mapToValidEventType(eventData.eventType);
-      
+
       // 이벤트 타입에 대응하는 이벤트 키 생성
       const eventKeyMap: Record<string, string> = {
         'login': 'user-login',
@@ -243,9 +243,9 @@ export class AuthFacade {
         'logout': 'user-logout',
         'profile_update': 'user-profile_update'
       };
-      
+
       const eventKey = eventKeyMap[eventData.eventType] || `user-${eventData.eventType}`;
-      
+
       // 이벤트 데이터 준비
       const payload = {
         userId: eventData.userId,
@@ -257,12 +257,12 @@ export class AuthFacade {
       };
 
       this.logger.debug(`사용자 이벤트 기록 시도: ${mappedEventType} (${eventKey}) for ${eventData.userId}`);
-      
+
       // 이벤트 서비스 API 호출
       await firstValueFrom(
         this.httpService.post(`${this.eventServiceUrl}/api/v1/user-events`, payload)
       );
-      
+
       this.logger.debug(`사용자 이벤트 기록 성공: ${mappedEventType} (${eventKey}) for ${eventData.userId}`);
     } catch (error) {
       // 이벤트 기록 실패해도 주요 기능에는 영향 없도록 처리

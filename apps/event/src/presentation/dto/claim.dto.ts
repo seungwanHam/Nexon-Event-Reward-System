@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEnum, IsOptional, IsObject } from 'class-validator';
+import { IsNotEmpty, IsString, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ClaimStatus } from '@app/libs/common/enum';
 
@@ -43,18 +43,18 @@ export class UserActionDto {
   @IsNotEmpty()
   @IsString()
   eventId: string;
-  
+
   @ApiProperty({ description: '사용자 ID' })
   @IsNotEmpty()
   @IsString()
   userId: string;
-  
+
   @ApiProperty({
     description: '사용자 행동 데이터 - 이벤트 타입에 따라 다른 데이터 필요',
     example: {
       // 단순 로그인 이벤트
       loginCount: 1,
-      
+
       // 커스텀 이벤트 (회원가입)
       eventCode: 'SIGN_UP',
       customEventPassed: true

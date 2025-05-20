@@ -69,20 +69,20 @@ export class RuleEngineImpl implements RuleEngine {
   // 조건 유형별 평가 메서드
   private async evaluateLoginCondition(userId: string, event: EventEntity, userAction?: any): Promise<boolean> {
     const { requiredCount } = event.conditionParams;
-    
+
     // 실제 사용자 로그인 이벤트 조회
     const loginEvents = await this.userEventRepository.findByUser(userId, 'login');
     const loginCount = loginEvents.length;
-    
+
     this.logger.debug(`로그인 조건 평가: 사용자 ${userId}, 필요 로그인 수 ${requiredCount}, 실제 로그인 수 ${loginCount}`);
     return loginCount >= requiredCount;
   }
 
   private async evaluateCustomCondition(userId: string, event: EventEntity, userAction?: any): Promise<boolean> {
     const { eventCode } = event.conditionParams;
-    
+
     this.logger.debug(`커스텀 조건 평가 시도: 사용자 ${userId}, 이벤트 코드 ${eventCode}`);
-    
+
     // 이벤트 코드와 이벤트 키 매핑 테이블
     const eventCodeToKeyMap: Record<string, string> = {
       'register': 'user-register',
@@ -91,21 +91,21 @@ export class RuleEngineImpl implements RuleEngine {
       'purchase': 'user-purchase',
       'login': 'user-login'
     };
-    
+
     // 이벤트 코드에 따라 매핑된 eventKey 사용
     const eventKey = eventCodeToKeyMap[eventCode] || eventCode;
-    
+
     // 실제 사용자 커스텀 이벤트 조회 - eventType이 custom이고 eventKey가 일치하는 이벤트 조회
     const allUserEvents = await this.userEventRepository.findByUser(userId);
-    const customEvents = allUserEvents.filter(event => 
+    const customEvents = allUserEvents.filter(event =>
       event.eventType === 'custom' && event.eventKey === eventKey
     );
-    
+
     const hasRequiredEvent = customEvents.length > 0;
-    
+
     this.logger.debug(`커스텀 조건 평가: 사용자 ${userId}, 이벤트 키 ${eventKey}, 이벤트 존재 여부 ${hasRequiredEvent}, 찾은 이벤트 수: ${customEvents.length}`);
     this.logger.debug(`사용자 이벤트 목록: ${JSON.stringify(allUserEvents.map(e => ({ eventType: e.eventType, eventKey: e.eventKey })))}`);
-    
+
     return hasRequiredEvent;
   }
 
@@ -118,7 +118,7 @@ export class RuleEngineImpl implements RuleEngine {
     metadata?: Record<string, any>;
   }> {
     this.logger.debug(`이벤트 조건 검증: 사용자 ${userId}, 이벤트 ${eventId}`);
-    
+
     // 이벤트 존재 확인
     const event = await this.eventRepository.findById(eventId);
     if (!event) {
@@ -150,10 +150,10 @@ export class RuleEngineImpl implements RuleEngine {
         }
       };
     }
-    
+
     // 이벤트 조건 검증 - 실제 사용자 이벤트 데이터 기반
     const isEligible = await this.evaluateCondition(userId, event);
-    
+
     if (!isEligible) {
       return {
         isValid: false,
@@ -166,7 +166,7 @@ export class RuleEngineImpl implements RuleEngine {
         }
       };
     }
-    
+
     return {
       isValid: true,
       metadata: {

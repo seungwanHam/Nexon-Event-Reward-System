@@ -16,7 +16,7 @@ export class EventRepositoryImpl implements EventRepository {
   constructor(
     @InjectModel(EventModel.name) private eventModel: Model<EventDocument>,
     @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
-  ) {}
+  ) { }
 
   async findById(id: string): Promise<EventEntity> {
     // 캐시에서 이벤트 검색
@@ -45,7 +45,7 @@ export class EventRepositoryImpl implements EventRepository {
     const now = new Date();
     // 캐시 키
     const cacheKey = `${this.EVENT_CACHE_PREFIX}active:${now.toISOString().split('T')[0]}`;
-    
+
     // 캐시에서 활성 이벤트 목록 검색
     const cached = await this.cacheService.get(cacheKey);
     if (cached) {
@@ -63,9 +63,9 @@ export class EventRepositoryImpl implements EventRepository {
       startDate: { $lte: now },
       endDate: { $gte: now },
     }).sort({ startDate: 1 }).exec();
-    
+
     const entities = events.map(event => this.mapToEntity(event));
-    
+
     // 캐시 업데이트
     if (entities.length > 0) {
       await this.cacheService.set(
@@ -74,13 +74,13 @@ export class EventRepositoryImpl implements EventRepository {
         this.EVENT_CACHE_TTL
       );
     }
-    
+
     return entities;
   }
 
   async save(event: EventEntity): Promise<void> {
     const eventDoc = this.mapToDocument(event);
-    
+
     if (!eventDoc.id) {
       eventDoc.id = uuidv4();
     }
@@ -90,7 +90,7 @@ export class EventRepositoryImpl implements EventRepository {
       eventDoc,
       { upsert: true }
     ).exec();
-    
+
     // 캐시 무효화
     await this.invalidateCache(eventDoc.id);
   }
@@ -100,19 +100,19 @@ export class EventRepositoryImpl implements EventRepository {
     if (result.deletedCount === 0) {
       throw new EventNotFoundException(`ID가 ${id}인 이벤트를 찾을 수 없습니다.`);
     }
-    
+
     // 캐시 무효화
     await this.invalidateCache(id);
   }
 
   private buildQuery(filter: Partial<EventEntity>): Record<string, any> {
     const query: Record<string, any> = {};
-    
+
     if (filter.id) query.id = filter.id;
     if (filter.name) query.name = { $regex: filter.name, $options: 'i' }; // 대소문자 구분 없는 부분 일치
     if (filter.status) query.status = filter.status;
     if (filter.conditionType) query.conditionType = filter.conditionType;
-    
+
     return query;
   }
 
@@ -154,15 +154,15 @@ export class EventRepositoryImpl implements EventRepository {
 
     try {
       const eventData = JSON.parse(cached);
-      
+
       // Date 문자열을 Date 객체로 변환
       if (eventData.startDate) eventData.startDate = new Date(eventData.startDate);
       if (eventData.endDate) eventData.endDate = new Date(eventData.endDate);
       if (eventData.createdAt) eventData.createdAt = new Date(eventData.createdAt);
       if (eventData.updatedAt) eventData.updatedAt = new Date(eventData.updatedAt);
-      
+
       console.log(`[DEBUG] 캐시에서 이벤트 복원: ${eventData.id}, 상태: ${eventData.status}, 시작일: ${eventData.startDate}, 종료일: ${eventData.endDate}`);
-      
+
       return EventEntity.create(eventData);
     } catch (error) {
       console.error('[ERROR] 캐시된 이벤트 파싱 오류:', error);

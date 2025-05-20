@@ -4,12 +4,7 @@ import { RegisterRequestDto, UpdateUserRequestDto, ProfileResponseDto } from '..
 import { UserRepository, USER_REPOSITORY } from '../../domain/repository';
 import { UserEntity } from '../../domain/entity';
 import { UserStatus } from '../../../../../libs/common/src/enum';
-import {
-  EmailAlreadyExistsException,
-  InvalidCredentialsException,
-  UserNotFoundException,
-  InvalidUserStatusException
-} from '../../../../../libs/common/src/exception';
+import { EmailAlreadyExistsException, InvalidCredentialsException, UserNotFoundException, InvalidUserStatusException } from '../../../../../libs/common/src/exception';
 import { WinstonLoggerService } from '../../../../../libs/infrastructure/src/logger';
 
 /**

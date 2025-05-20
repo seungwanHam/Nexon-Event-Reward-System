@@ -88,17 +88,17 @@ import { USER_REPOSITORY, TOKEN_BLACKLIST_REPOSITORY } from './domain/repository
     }, LockType.REDIS),
   ],
   controllers: [
-    AuthHttpController, 
+    AuthHttpController,
     HealthController
   ],
   providers: [
     // 파사드
     AuthFacade,
-    
+
     // 서비스
     AuthService,
     UserService,
-    
+
     // 레포지토리 구현체
     {
       provide: USER_REPOSITORY,

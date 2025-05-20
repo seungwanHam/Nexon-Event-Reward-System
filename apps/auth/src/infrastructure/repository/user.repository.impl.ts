@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { Injectable, NotFoundException, Inject, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ICacheService, CACHE_SERVICE } from '@app/libs/infrastructure/cache';
 import { UserNotFoundException, ValidationException } from '@app/libs/common/exception';
@@ -81,7 +81,7 @@ export class UserRepositoryImpl implements UserRepository {
     try {
       // 이메일 정규화
       const normalizedEmail = email.toLowerCase().trim();
-      
+
       // 캐시에서 사용자 검색
       const cachedUser = await this.getCachedUser(`${this.USER_CACHE_PREFIX}email:${normalizedEmail}`);
       if (cachedUser) return cachedUser;
@@ -105,17 +105,17 @@ export class UserRepositoryImpl implements UserRepository {
 
   async exists(criteria: { email?: string; nickname?: string; excludeId?: string }): Promise<boolean> {
     const query: any = {};
-    
+
     if (criteria.email) {
       query.$or = query.$or || [];
       query.$or.push({ email: criteria.email.toLowerCase().trim() });
     }
-    
+
     if (criteria.nickname) {
       query.$or = query.$or || [];
       query.$or.push({ nickname: criteria.nickname.trim() });
     }
-    
+
     if (criteria.excludeId) {
       query._id = { $ne: criteria.excludeId };
     }
@@ -160,7 +160,7 @@ export class UserRepositoryImpl implements UserRepository {
     if (!result) {
       throw new UserNotFoundException(`사용자 ID ${userId}를 찾을 수 없습니다`);
     }
-    
+
     await this.invalidateCache(userId);
   }
 
@@ -176,7 +176,7 @@ export class UserRepositoryImpl implements UserRepository {
           throw new ConflictException(`닉네임 ${user.nickname}은(는) 이미 사용 중입니다.`);
         }
       }
-      
+
       const updatedUser = await this.userModel.findByIdAndUpdate(
         user.id,
         {
@@ -243,10 +243,10 @@ export class UserRepositoryImpl implements UserRepository {
     if (!user) return null;
 
     const userEntity = this.toEntity(user);
-    
+
     // 초대 코드 캐싱 (짧은 TTL)
     await this.cacheService.set(cacheKey, JSON.stringify(userEntity), 60); // 1분
-    
+
     return userEntity;
   }
 
@@ -285,7 +285,7 @@ export class UserRepositoryImpl implements UserRepository {
         this.USER_CACHE_TTL
       )
     ];
-    
+
     // publicId가 있으면 publicId로도 캐싱
     if (user.publicId) {
       promises.push(
@@ -296,7 +296,7 @@ export class UserRepositoryImpl implements UserRepository {
         )
       );
     }
-    
+
     await Promise.all(promises);
   }
 
@@ -307,15 +307,15 @@ export class UserRepositoryImpl implements UserRepository {
         this.cacheService.del(`${this.USER_CACHE_PREFIX}id:${userId}`),
         this.cacheService.del(`${this.USER_CACHE_PREFIX}email:${user.email.toLowerCase().trim()}`)
       ];
-      
+
       if (user.publicId) {
         promises.push(this.cacheService.del(`${this.USER_CACHE_PREFIX}publicId:${user.publicId}`));
       }
-      
+
       if (user.inviteCode) {
         promises.push(this.cacheService.del(`${this.USER_CACHE_PREFIX}invite:${user.inviteCode}`));
       }
-      
+
       await Promise.all(promises);
     } catch (error) {
       // 사용자를 찾을 수 없는 경우, ID 기반 캐시만 삭제

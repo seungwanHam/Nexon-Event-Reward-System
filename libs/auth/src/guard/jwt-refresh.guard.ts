@@ -35,7 +35,7 @@ export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {
     if (info instanceof TokenExpiredError) {
       throw new UnauthorizedException('리프레시 토큰이 만료되었습니다');
     }
-    
+
     if (err || !user) {
       throw new UnauthorizedException('유효하지 않은 리프레시 토큰입니다');
     }

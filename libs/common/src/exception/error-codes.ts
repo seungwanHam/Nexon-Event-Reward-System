@@ -66,7 +66,7 @@ export enum GatewayErrorCodes {
 }
 
 // 모든 에러 코드 타입 통합
-export type ErrorCode = 
+export type ErrorCode =
   | SystemErrorCodes
   | AuthErrorCodes
   | EventErrorCodes

@@ -6,12 +6,12 @@ export interface ValidationResult {
    * 검증 통과 여부
    */
   isValid: boolean;
-  
+
   /**
    * 오류 메시지 (실패 시)
    */
   errorMessage?: string;
-  
+
   /**
    * 검증 과정에서 수집된 메타데이터
    */

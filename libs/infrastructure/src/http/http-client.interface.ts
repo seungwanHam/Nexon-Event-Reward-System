@@ -6,22 +6,22 @@
 export interface HttpRequestConfig<T = any> {
   /** HTTP 메서드 (GET, POST, PUT, DELETE 등) */
   method: string;
-  
+
   /** 요청 URL 경로 */
   url: string;
-  
+
   /** 기본 URL (도메인) */
   baseURL?: string;
-  
+
   /** 요청 헤더 */
   headers?: Record<string, string>;
-  
+
   /** 요청 본문 데이터 */
   data?: T;
-  
+
   /** URL 쿼리 파라미터 */
   params?: Record<string, string | number | boolean | null | undefined>;
-  
+
   /** 요청 타임아웃 (밀리초) */
   timeout?: number;
 }
@@ -34,10 +34,10 @@ export interface HttpRequestConfig<T = any> {
 export interface GetRequestConfig {
   /** 요청 헤더 */
   headers?: Record<string, string>;
-  
+
   /** URL 쿼리 파라미터 */
   params?: Record<string, string | number | boolean | null | undefined>;
-  
+
   /** 요청 타임아웃 (밀리초) */
   timeout?: number;
 }
@@ -50,13 +50,13 @@ export interface GetRequestConfig {
 export interface DataRequestConfig<T> {
   /** 요청 헤더 */
   headers?: Record<string, string>;
-  
+
   /** 요청 본문 데이터 */
   data: T;
-  
+
   /** URL 쿼리 파라미터 */
   params?: Record<string, string | number | boolean | null | undefined>;
-  
+
   /** 요청 타임아웃 (밀리초) */
   timeout?: number;
 }
@@ -69,10 +69,10 @@ export interface DataRequestConfig<T> {
 export interface HttpResponse<T = any> {
   /** 응답 본문 데이터 */
   data: T;
-  
+
   /** HTTP 상태 코드 */
   status: number;
-  
+
   /** 응답 헤더 */
   headers: Record<string, string>;
 }
@@ -91,7 +91,7 @@ export interface HttpClient {
    * @returns HTTP 응답 객체
    */
   request<T = any, D = any>(config: HttpRequestConfig<D>): Promise<HttpResponse<T>>;
-  
+
   /**
    * GET 요청을 보냅니다.
    * 
@@ -100,7 +100,7 @@ export interface HttpClient {
    * @returns 응답 데이터
    */
   get<T = any>(url: string, config?: GetRequestConfig): Promise<T>;
-  
+
   /**
    * POST 요청을 보냅니다.
    * 
@@ -110,7 +110,7 @@ export interface HttpClient {
    * @returns 응답 데이터
    */
   post<T = any, D = any>(url: string, data: D, config?: Omit<DataRequestConfig<D>, 'data'>): Promise<T>;
-  
+
   /**
    * PUT 요청을 보냅니다.
    * 
@@ -120,7 +120,7 @@ export interface HttpClient {
    * @returns 응답 데이터
    */
   put<T = any, D = any>(url: string, data: D, config?: Omit<DataRequestConfig<D>, 'data'>): Promise<T>;
-  
+
   /**
    * DELETE 요청을 보냅니다.
    * 

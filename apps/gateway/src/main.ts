@@ -1,6 +1,5 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { GatewayModule } from './gateway.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { WinstonLoggerService } from '@app/libs/infrastructure/logger';

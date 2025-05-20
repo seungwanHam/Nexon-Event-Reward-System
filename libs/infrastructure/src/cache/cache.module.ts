@@ -47,7 +47,7 @@ export class CacheModule {
       provide: CACHE_SERVICE,
       useFactory: (configService: ConfigService, logger: WinstonLoggerService) => {
         const cacheType = options.type || 'memory';
-        
+
         switch (cacheType) {
           case 'redis':
             return new RedisCacheService(

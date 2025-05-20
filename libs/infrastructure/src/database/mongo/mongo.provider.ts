@@ -1,4 +1,3 @@
-import { Provider } from '@nestjs/common';
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import { DatabaseConfigOptions } from '../interface/database-config.interface';
 
@@ -10,7 +9,7 @@ import { DatabaseConfigOptions } from '../interface/database-config.interface';
 export function createMongoProvider(options: DatabaseConfigOptions): any {
   // 기본 URI 생성
   let uri = options.uri || process.env.MONGODB_URI || 'mongodb://localhost:27017/nexon-event-system';
-  
+
   // 데이터베이스 이름이 URI에 포함되어 있지 않은 경우 추가
   if (options.dbName && !uri.includes('mongodb+srv://') && !uri.includes('/')) {
     if (!uri.endsWith('/')) {

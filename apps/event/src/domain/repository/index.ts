@@ -1,0 +1,9 @@
+// Repository tokens for dependency injection
+export const EVENT_REPOSITORY = 'EVENT_REPOSITORY';
+export const REWARD_REPOSITORY = 'REWARD_REPOSITORY';
+export const REWARD_CLAIM_REPOSITORY = 'REWARD_CLAIM_REPOSITORY';
+export const CLAIM_REPOSITORY = 'CLAIM_REPOSITORY';
+export const USER_EVENT_REPOSITORY = 'USER_EVENT_REPOSITORY';
+
+// Repository interfaces
+export * from './user-event.repository'; 

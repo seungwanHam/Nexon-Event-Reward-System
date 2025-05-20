@@ -1,9 +1,9 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { ICacheService, CACHE_SERVICE } from '@app/libs/infrastructure/cache';
+import { ICacheService, CACHE_SERVICE } from '../../cache';
 import Redis from 'ioredis';
 
-import { LockService } from '@app/libs/infrastructure/lock-manager/lock.service';
-import { LockOptions } from '@app/libs/infrastructure/lock-manager/interface';
+import { LockService } from '../lock.service';
+import { LockOptions } from '../interface';
 
 /**
  * Redis 기반 분산 락 구현체
@@ -32,7 +32,7 @@ export class RedisLockService extends LockService implements OnModuleInit {
 
       // 환경 변수에서 Redis 설정 가져오기
       const redisHost = process.env.REDIS_HOST || 'localhost';
-      const redisPort = parseInt(process.env.REDIS_PORT, 10) || 6380; // 기본 포트를 6380으로 변경
+      const redisPort = parseInt(process.env.REDIS_PORT, 10) || 6379;
       const redisPassword = process.env.REDIS_PASSWORD || 'redis-password';
 
       // 직접 Redis 클라이언트 생성

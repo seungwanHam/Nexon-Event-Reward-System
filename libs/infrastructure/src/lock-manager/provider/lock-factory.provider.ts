@@ -1,7 +1,7 @@
 import { Provider } from '@nestjs/common';
-import { LockType } from '@app/libs/common/enum';
-import { LockManagerOptions } from '@app/libs/infrastructure/lock-manager/interface';
-import { RedisLockService, MemoryLockService } from '@app/libs/infrastructure/lock-manager/implementation';
+import { LockType } from '../../../../common/src/enum';
+import { LockManagerOptions } from '../interface';
+import { RedisLockService, MemoryLockService } from '../implementation';
 
 /**
  * 락 서비스 팩토리 함수

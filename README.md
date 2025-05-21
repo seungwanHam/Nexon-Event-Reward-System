@@ -274,7 +274,7 @@ async createClaim(userId: string, eventId: string, rewardId: string): Promise<Re
 
 ### 사전 요구사항
 
-- Docker 및 Docker Compose 설치
+- Docker 및 Docker Compose
 - Node.js 18 이상
 
 ### 설치 및 실행
@@ -283,7 +283,7 @@ async createClaim(userId: string, eventId: string, rewardId: string): Promise<Re
 
 ```
 # 프로젝트 클론
-git clone https://github.com/your-username/Nexon-Event-Reward-System.git
+git clone https://github.com/seungwanHam/Nexon-Event-Reward-System.git
 cd Nexon-Event-Reward-System
 
 # Docker 컨테이너 실행
